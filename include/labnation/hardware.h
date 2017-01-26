@@ -5,11 +5,9 @@
 
 namespace labnation {
 
-using namespace std;
-
 class Hardware {
 public:
-    virtual string GetSerial();
+    virtual std::string GetSerial() = 0;
 };
 }
 

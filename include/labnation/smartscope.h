@@ -1,30 +1,195 @@
-#ifndef _LABNATION_SMARTSCOPE_H
-#define _LABNATION_SMARTSCOPE_H
+#ifndef LABNATION_SMARTSCOPE_H
+#define LABNATION_SMARTSCOPE_H
 
-#include "hardware.h"
+#include <map>
+#include <vector>
+
 namespace labnation {
+const int HDR_OFFSET = 15;
+const int SZ_HDR = 64;
+const int PACKAGE_MAX = 64;
+const int SZ_OVERVIEW = 2048 * 2;
+const int ACQUISITION_DEPTH_MIN = 128; //Size of RAM
+const int ACQUISITION_DEPTH_MAX = 4 * 1024 * 1024; //Size of RAM
+const int FETCH_SIZE_MAX = 2048 * 2;
 
-class SmartScope : public Hardware {
-public:
-    enum Controller
-    {
-        PIC = 0,
-        ROM = 1,
-        FLASH = 2,
-        FPGA = 3,
-        AWG = 4
-    };
-    virtual void GetControllerRegister(Controller ctrl, uint address, uint length, void* data);
-    virtual void SetControllerRegister(Controller ctrl, uint address, void* data);
-    virtual int GetAcquisition(void* buffer);
-    virtual void* GetData(int length);
-    virtual void FlushDataPipe();
-    virtual void Reset();
-    virtual bool FlashFpga(void* firmware);
-    virtual void* GetPicFirmwareVersion();
-    virtual bool IsDestroyed();
-    virtual void Destroy();
+enum REG
+{
+  STROBE_UPDATE = 0,
+  SPI_ADDRESS = 1,
+  SPI_WRITE_VALUE = 2,
+  DIVIDER_MULTIPLIER = 3,
+  CHA_YOFFSET_VOLTAGE = 4,
+  CHB_YOFFSET_VOLTAGE = 5,
+  TRIGGER_PWM = 6,
+  TRIGGER_LEVEL = 7,
+  TRIGGER_MODE = 8,
+  TRIGGER_PW_MIN_B0 = 9,
+  TRIGGER_PW_MIN_B1 = 10,
+  TRIGGER_PW_MIN_B2 = 11,
+  TRIGGER_PW_MAX_B0 = 12,
+  TRIGGER_PW_MAX_B1 = 13,
+  TRIGGER_PW_MAX_B2 = 14,
+  INPUT_DECIMATION = 15,
+  ACQUISITION_DEPTH = 16,
+  TRIGGERHOLDOFF_B0 = 17,
+  TRIGGERHOLDOFF_B1 = 18,
+  TRIGGERHOLDOFF_B2 = 19,
+  TRIGGERHOLDOFF_B3 = 20,
+  VIEW_DECIMATION = 21,
+  VIEW_OFFSET_B0 = 22,
+  VIEW_OFFSET_B1 = 23,
+  VIEW_OFFSET_B2 = 24,
+  VIEW_ACQUISITIONS = 25,
+  VIEW_BURSTS = 26,
+  VIEW_EXCESS_B0 = 27,
+  VIEW_EXCESS_B1 = 28,
+  DIGITAL_TRIGGER_RISING = 29,
+  DIGITAL_TRIGGER_FALLING = 30,
+  DIGITAL_TRIGGER_HIGH = 31,
+  DIGITAL_TRIGGER_LOW = 32,
+  DIGITAL_OUT = 33,
+  GENERATOR_DECIMATION_B0 = 34,
+  GENERATOR_DECIMATION_B1 = 35,
+  GENERATOR_DECIMATION_B2 = 36,
+  GENERATOR_SAMPLES_B0 = 37,
+  GENERATOR_SAMPLES_B1 = 38,
 };
+
+
+enum STR
+{
+  GLOBAL_RESET = 0,
+  INIT_SPI_TRANSFER = 1,
+  GENERATOR_TO_AWG = 2,
+  LA_ENABLE = 3,
+  SCOPE_ENABLE = 4,
+  SCOPE_UPDATE = 5,
+  FORCE_TRIGGER = 6,
+  VIEW_UPDATE = 7,
+  VIEW_SEND_OVERVIEW = 8,
+  VIEW_SEND_PARTIAL = 9,
+  ACQ_START = 10,
+  ACQ_STOP = 11,
+  CHA_DCCOUPLING = 12,
+  CHB_DCCOUPLING = 13,
+  ENABLE_ADC = 14,
+  ENABLE_NEG = 15,
+  ENABLE_RAM = 16,
+  DOUT_3V_5V = 17,
+  EN_OPAMP_B = 18,
+  GENERATOR_TO_DIGITAL = 19,
+  ROLL = 20,
+  LA_CHANNEL = 21,
+};
+
+enum ROM
+{
+  FW_GIT0 = 0,
+  FW_GIT1 = 1,
+  FW_GIT2 = 2,
+  FW_GIT3 = 3,
+  SPI_RECEIVED_VALUE = 4,
+  STROBES = 5,
+};
+
+static std::map<REG, int> HDR_REGS
+{
+  { TRIGGER_LEVEL, 0 },
+  { TRIGGER_MODE, 1 },
+  { TRIGGERHOLDOFF_B0, 2 },
+  { TRIGGERHOLDOFF_B1, 3 },
+  { TRIGGERHOLDOFF_B2, 4 },
+  { TRIGGERHOLDOFF_B3, 5 },
+  { CHA_YOFFSET_VOLTAGE, 6 },
+  { CHB_YOFFSET_VOLTAGE, 7 },
+  { DIVIDER_MULTIPLIER, 8 },
+  { INPUT_DECIMATION, 9 },
+  { TRIGGER_PW_MIN_B0, 10 },
+  { TRIGGER_PW_MIN_B1, 11 },
+  { TRIGGER_PW_MIN_B2, 12 },
+  { TRIGGER_PW_MAX_B0, 13 },
+  { TRIGGER_PW_MAX_B1, 14 },
+  { TRIGGER_PW_MAX_B2, 15 },
+  { TRIGGER_PWM, 16 },
+  { DIGITAL_TRIGGER_RISING, 17 },
+  { DIGITAL_TRIGGER_FALLING, 18 },
+  { DIGITAL_TRIGGER_HIGH, 19 },
+  { DIGITAL_TRIGGER_LOW, 20 },
+  { ACQUISITION_DEPTH, 21 },
+  { VIEW_DECIMATION, 22 },
+  { VIEW_OFFSET_B0, 23 },
+  { VIEW_OFFSET_B1, 24 },
+  { VIEW_OFFSET_B2, 25 },
+  { VIEW_ACQUISITIONS, 26 },
+  { VIEW_BURSTS, 27 },
+  { VIEW_EXCESS_B0, 28 },
+  { VIEW_EXCESS_B1, 29 },
+};
+const int N_HDR_REGS = 30;
+
+
+static std::map<STR, int> HDR_STROBES =
+{
+  { LA_ENABLE, 0 },
+  { CHA_DCCOUPLING, 1 },
+  { CHB_DCCOUPLING, 2 },
+  { ROLL, 3 },
+  { LA_CHANNEL, 4 },
+};
+const int N_HDR_STROBES = 5;
+
+
+
+static std::vector<STR> AcquisitionStrobes =
+{
+  LA_ENABLE,
+  CHA_DCCOUPLING,
+  CHB_DCCOUPLING,
+  ROLL,
+  LA_CHANNEL,
+};
+
+
+static std::vector<REG> AcquisitionRegisters =
+{
+  TRIGGER_LEVEL,
+  TRIGGER_MODE,
+  TRIGGERHOLDOFF_B0,
+  TRIGGERHOLDOFF_B1,
+  TRIGGERHOLDOFF_B2,
+  TRIGGERHOLDOFF_B3,
+  CHA_YOFFSET_VOLTAGE,
+  CHB_YOFFSET_VOLTAGE,
+  DIVIDER_MULTIPLIER,
+  INPUT_DECIMATION,
+  TRIGGER_PW_MIN_B0,
+  TRIGGER_PW_MIN_B1,
+  TRIGGER_PW_MIN_B2,
+  TRIGGER_PW_MAX_B0,
+  TRIGGER_PW_MAX_B1,
+  TRIGGER_PW_MAX_B2,
+  TRIGGER_PWM,
+  DIGITAL_TRIGGER_RISING,
+  DIGITAL_TRIGGER_FALLING,
+  DIGITAL_TRIGGER_HIGH,
+  DIGITAL_TRIGGER_LOW,
+  ACQUISITION_DEPTH,
+};
+
+
+static std::vector<REG> ViewRegisters =
+{
+  VIEW_DECIMATION,
+  VIEW_OFFSET_B0,
+  VIEW_OFFSET_B1,
+  VIEW_OFFSET_B2,
+  VIEW_ACQUISITIONS,
+  VIEW_BURSTS,
+  VIEW_EXCESS_B0,
+  VIEW_EXCESS_B1,
+};
+
 }
 
-#endif //_LABNATION_SMARTSCOPE_H
+#endif // LABNATION_SMARTSCOPE_H
