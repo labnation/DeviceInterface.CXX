@@ -31,6 +31,8 @@ endif
 
 ifdef DEBUG
 CCFLAGS += -DDEBUG
+else
+CCFLAGS += -O3
 endif
 
 .PHONY: all clean clear
