@@ -309,7 +309,6 @@ void InterfaceServer::ControlSocketServer() {
             Stop();
             return;
           }
-          _processing = false;
           if (response->length != 0)
           {
             response->length += sizeof(Message);
@@ -325,6 +324,7 @@ copy_down:
       }
       msg_buf_len -= msg_buf_offset;
       msg_buf_offset = 0;
+      _processing = false;
     }
     else
     {
