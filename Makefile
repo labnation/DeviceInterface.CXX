@@ -29,9 +29,9 @@ ifeq (LINUX,$(HOST_OS))
 LIBS += -lavahi-client -lavahi-common
 endif
 
-#ifdef DEBUG
+ifdef DEBUG
 CCFLAGS += -DDEBUG
-#endif
+endif
 
 .PHONY: all clean clear
 
