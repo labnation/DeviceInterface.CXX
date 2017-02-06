@@ -5,7 +5,7 @@
 
 #ifdef DEBUG
 #define debug(fmt, ...) \
-            do { if (DEBUG) std::fprintf(stderr, "[DBG ] " fmt "\n", ##__VA_ARGS__); } while (0)
+            do { std::fprintf(stderr, "[DBG ] " fmt "\n", ##__VA_ARGS__); } while (0)
 #else
 #define debug(fmt, ...)
 #endif

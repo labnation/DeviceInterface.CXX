@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <utils.h>
+#include <netinet/tcp.h>
 
 namespace labnation {
 
@@ -130,8 +131,6 @@ void InterfaceServer::DataSocketServer() {
 
   while (_connected) {
 
-    while(_processing) { }
-
     try
     {
       length = _scope->GetAcquisition(BUF_SIZE, smartScopeBuffer);
@@ -176,7 +175,6 @@ void* InterfaceServer::ThreadStartControlSocketServer(void * ctx){
 
 void InterfaceServer::ControlSocketServer() {
   _disconnect_called = false;
-  _processing = false;
 
   uint8_t tx_buf[BUF_SIZE];
   int ret;
@@ -236,7 +234,6 @@ void InterfaceServer::ControlSocketServer() {
         continue;
 
     if (_connected) {
-      _processing = true;
       while(msg_buf_len - msg_buf_offset > sizeof(Message) - 1) {
           request = (Message *)&msg_buf[msg_buf_offset];
           if(msg_buf_len - msg_buf_offset < request->length)
@@ -324,7 +321,6 @@ copy_down:
       }
       msg_buf_len -= msg_buf_offset;
       msg_buf_offset = 0;
-      _processing = false;
     }
     else
     {

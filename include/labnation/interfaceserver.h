@@ -103,7 +103,6 @@ private:
   bool _connected = false;
 
   bool _disconnect_called = false;
-  bool _processing = false;
 
   /* Zeroconf service registration */
 
