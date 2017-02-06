@@ -2,13 +2,14 @@
 OUT_DIR := build
 SRC_DIR := src
 LIB_DIR := lib
-INCLUDE_DIR := include /usr/include
+INCLUDE_DIR := include /usr/include /usr/local/include
 INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
 	main.cpp \
         hardware/smartscopeusb.cpp \
-        net/interfaceserver.cpp
+        net/interfaceserver.cpp \
+        utils.cpp
 
 OBJS := $(SRCS:.cpp=.cpp.o)
 OBJS := $(addprefix $(OUT_DIR)/,$(OBJS))

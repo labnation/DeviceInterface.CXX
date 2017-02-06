@@ -8,7 +8,7 @@
 #include <labnation/interfaceserver.h>
 #include "../blobs/SmartScope_A12.h"
 
-using namespace std;
+
 using namespace labnation;
 
 libusb_context* usb_ctx;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
             server = new InterfaceServer(scope);
             server->Start();
             while(server->GetState() != InterfaceServer::State::Destroyed) {
-              this_thread::sleep_for(chrono::milliseconds(100));
+              std::this_thread::sleep_for(std::chrono::milliseconds(100));
               if(server->GetState() == InterfaceServer::State::Stopped)
                 server->Start();
             }
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
       }
     }
     libusb_free_device_list(devices, 0);
-    this_thread::sleep_for(chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   libusb_exit(NULL);
 }

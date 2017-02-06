@@ -1,3 +1,5 @@
+include/utils.h
+src/utils.cpp
 include/labnation/interfaceserver.h
 src/main.cpp
 src/net/interfaceserver.cpp

@@ -20,13 +20,11 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-using namespace std;
-
 namespace labnation {
 
-class NetException: public exception {
+class NetException: public std::exception {
 private:
-    string _message;
+    std::string _message;
 public:
     explicit NetException(const char* message, ...);
     virtual const char* what() const throw() {
@@ -90,7 +88,7 @@ private:
   static const int HDR_SZ = 4;
   static const int BUF_SIZE = 8 * 1024;
 
-  function<void(InterfaceServer*)> _stateChanged = NULL;
+  std::function<void(InterfaceServer*)> _stateChanged = NULL;
   const char* SERVICE_TYPE = "_sss._tcp";
   const char* REPLY_DOMAIN = "local.";
   const char* TXT_DATA_PORT = "DATA_PORT";

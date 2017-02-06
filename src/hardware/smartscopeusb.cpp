@@ -5,8 +5,6 @@
 #include <labnation/smartscopeusb.h>
 #include <stdarg.h>
 
-using namespace std;
-
 namespace labnation {
     
 ScopeIOException::ScopeIOException(const char* message, ...) {
@@ -252,7 +250,7 @@ void SmartScopeUsb::FlashFpga(int length, uint8_t* firmware)
    */
   
   //FIXME: can be shorter prolly
-  this_thread::sleep_for(chrono::milliseconds(1000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
   WriteControlBytesBulk(length, firmware);
   for (int j = 0; j < padding; j++)

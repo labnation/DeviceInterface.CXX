@@ -1,5 +1,7 @@
 #include <labnation/interfaceserver.h>
+#ifndef DARWIN
 #include <avahi-common/error.h>
+#endif
 #include <labnation.h>
 #include <errno.h>
 #include <string.h>
@@ -8,8 +10,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <time.h>
-
-using namespace std;
+#include <utils.h>
 
 namespace labnation {
 
@@ -55,7 +56,7 @@ void* InterfaceServer::ThreadStartManageState(void * ctx) {
 void InterfaceServer::ManageState() {
   while (_state != Destroyed)
   {
-    this_thread::sleep_for(chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     if (_state == Destroying || _state == Starting || _state == Stopping)
       throw new NetException("Server state transitioning outside of state manager thread");
 
@@ -72,7 +73,7 @@ void InterfaceServer::ManageState() {
       SetState(Starting);
       pthread_create(&_thread_ctrl, NULL, this->ThreadStartControlSocketServer, this);
       while(_sock_data_listen == -1)
-        this_thread::sleep_for(chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
       SetState(Started);
       debug("=============================== Started ===");
       break;
@@ -163,7 +164,7 @@ void* InterfaceServer::ThreadStartControlSocketServer(void * ctx){
   } catch(ScopeIOException e) {
     info("Scope IO Exception thrown by control socket thread, destroying.\nMSG=[%s]", e.what());
     ((InterfaceServer*)ctx)->Destroy();
-  } catch(exception e) {
+  } catch(std::exception e) {
     info("Unknown exception thrown by control socket thread, stopping.\nMSG=[%s]", e.what());
     ((InterfaceServer*)ctx)->Stop();
   }
@@ -187,7 +188,8 @@ void InterfaceServer::ControlSocketServer() {
   sockaddr_in sa, sa_cli;
   socklen_t socklen = sizeof(sa);
 
-  string serial;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::string serial;
   uint32_t version;
 
   /* Start control server */
@@ -243,7 +245,7 @@ void InterfaceServer::ControlSocketServer() {
           case SERIAL:
             serial = _scope->GetSerial();
             if(serial.length() == 0)
-                serial = string("0254301KA16");
+                serial = std::string("0254301KA16");
             response->length = 11;
             memcpy(response->data, serial.c_str(), response->length);
             break;
@@ -375,16 +377,10 @@ void InterfaceServer::CleanSocketThread(pthread_t* thread, int *listener_socket,
   }
 
   if(*thread) {
-    timespec timeout;
-    clock_gettime(CLOCK_REALTIME, &timeout);
-    timeout.tv_sec += 5;
-    if((err = pthread_timedjoin_np(*thread, NULL, &timeout))) {
+    if((err = pthread_join_timeout(*thread, 5000))) {
       warn("Failed to join thread, canceling it: %s", strerror(err));
       pthread_cancel(*thread);
-      this_thread::sleep_for(chrono::milliseconds(100));
-      clock_gettime(CLOCK_REALTIME, &timeout);
-      timeout.tv_sec += 5;
-      if((err = pthread_timedjoin_np(*thread, NULL, &timeout)))
+      if((err = pthread_join_timeout(*thread, 5000)))
         error("Failed to join thread, even after cancelling: %s", strerror(err));
     }
   } else {
@@ -408,7 +404,7 @@ void InterfaceServer::SetState(State state) {
 InterfaceServer::State InterfaceServer::GetState() { return _state; }
 
 void InterfaceServer::RegisterService() {
-  string name = "SmartScope []";
+  std::string name = "SmartScope []";
 #ifdef DARWIN
   DNSServiceErrorType err = DNSServiceRegister(
         &_dnsService, 0, 0, name.c_str(), SERVICE_TYPE,
