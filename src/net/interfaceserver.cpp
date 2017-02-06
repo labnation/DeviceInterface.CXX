@@ -41,10 +41,12 @@ InterfaceServer::~InterfaceServer() {
 #ifndef DARWIN
   avahi_threaded_poll_stop(_avahi_poll);
   avahi_client_free(_avahi_client);
+  avahi_threaded_poll_free(_avahi_poll);
 #endif
   debug("destructing interface server");
   while(!(GetState() == Destroyed))
     Destroy();
+  pthread_join(_thread_state, NULL);
 }
 
 void* InterfaceServer::ThreadStartManageState(void * ctx) {
@@ -191,6 +193,8 @@ void InterfaceServer::ControlSocketServer() {
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   std::string serial;
   uint32_t version;
+
+  memset(tx_buf, 0, sizeof(tx_buf));
 
   /* Start control server */
   if((_sock_ctrl_listen = InterfaceServer::StartServer("0")) == -1)

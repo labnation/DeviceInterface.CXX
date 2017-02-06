@@ -30,8 +30,9 @@ int main(int argc, char *argv[])
     for(int i = 0; i < n; i++) {
       libusb_get_device_descriptor(devices[i], &desc);
       if(desc.idVendor == SmartScopeUsb::VID) {
-        for(uint j = 0; j < sizeof(SmartScopeUsb::PIDs); j++) {
-          if(desc.idProduct == SmartScopeUsb::PIDs[j]) {
+        for(std::vector<int>::const_iterator j = SmartScopeUsb::PIDs.begin();
+            j != SmartScopeUsb::PIDs.end(); ++j) {
+          if(desc.idProduct == *j) {
 
             scope = new SmartScopeUsb(devices[i]);
             server = new InterfaceServer(scope);
