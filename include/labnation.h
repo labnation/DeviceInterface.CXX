@@ -2,6 +2,9 @@
 #define _LABNATION_H
 
 #include <exception>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 #ifdef DEBUG
 #define debug(fmt, ...) \
@@ -22,8 +25,12 @@
     #define PTHREAD_NAME(name) \
         pthread_setname_np(name);
 #else
+#ifdef TARGET_OPENWRT
+    #define PTHREAD_NAME(name)
+#else
     #define PTHREAD_NAME(name) \
         pthread_setname_np(pthread_self(), name);
+#endif
 #endif
 
 #endif //_LABNATION_H

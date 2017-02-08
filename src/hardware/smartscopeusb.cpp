@@ -1,6 +1,5 @@
 #include <thread>
 #include <chrono>
-#include <cstring>
 #include <labnation.h>
 #include <labnation/smartscopeusb.h>
 #include <stdarg.h>
