@@ -23,7 +23,11 @@ HOST_OS := $(shell uname | tr a-z A-Z)
 CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -I$(PREFIX)/include -MMD -MP -D$(HOST_OS) -std=c++11
 LIBS := -lusb-1.0 -lstdc++ -lpthread -pthread
 LIB_PATH := -L$(PREFIX)/lib
-LDFLAGS += -Wall $(LIBS) $(LIB_PATH) -static
+LDFLAGS += -Wall $(LIBS) $(LIB_PATH) 
+
+ifdef STATIC
+LDFLAGS += -static
+endif
 
 $(info $$HOST_OS is [${HOST_OS}])
 ifeq (LINUX,$(HOST_OS))
