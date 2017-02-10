@@ -46,14 +46,14 @@ endif
 
 .PHONY: all clean clear
 
-all: server
+all: smartscopeserver
 
 clean:
 	-rm -rf $(OUT_DIR)
 
 -include $(DEPS)
 
-server: $(OBJS)
+smartscopeserver: $(OBJS)
 	@printf " Making %s %s\n" $@ $^
 	$(CC) -o $@ $^ $(LDFLAGS)
 
