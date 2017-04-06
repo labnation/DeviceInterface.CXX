@@ -16,21 +16,21 @@ OBJS := $(addprefix $(OUT_DIR)/,$(OBJS))
 DEPS := $(OBJS:.o=.d)
 
 PREFIX ?= /usr
-CC = $(CROSS_COMPILE)gcc
+CC = $(CROSS_COMPILE)c++
 LD = $(CROSS_COMPILE)ld
 
-HOST_OS := $(shell uname | tr a-z A-Z)
-CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -I$(PREFIX)/include -MMD -MP -D$(HOST_OS) -std=c++11
-LIBS := -lusb-1.0 -lstdc++ -lpthread -pthread
+TARGET ?= $(shell uname | tr a-z A-Z)
+CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -I$(PREFIX)/include -MMD -DTARGET_${TARGET} -MP -std=c++11
+LIBS := -lusb-1.0 -lpthread
 LIB_PATH := -L$(PREFIX)/lib
-LDFLAGS += -Wall $(LIBS) $(LIB_PATH) 
+LDFLAGS += -Wall $(LIBS) $(LIB_PATH)
 
 ifdef STATIC
 LDFLAGS += -static
 endif
 
-$(info $$HOST_OS is [${HOST_OS}])
-ifeq (LINUX,$(HOST_OS))
+$(info $$TARGET is [${TARGET}])
+ifneq (DARWIN,$(TARGET))
 LIBS += -lavahi-client -lavahi-common -ldbus-1
 endif
 
@@ -38,10 +38,6 @@ ifdef DEBUG
 CCFLAGS += -DDEBUG
 else
 CCFLAGS += -O3
-endif
-
-ifdef TARGET
-CCFLAGS += -DTARGET_$(TARGET)
 endif
 
 .PHONY: all clean clear

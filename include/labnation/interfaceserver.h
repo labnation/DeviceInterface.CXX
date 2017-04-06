@@ -4,7 +4,7 @@
 #include "smartscope.h"
 #include "smartscopeusb.h"
 
-#ifdef DARWIN
+#ifdef TARGET_DARWIN
 #include <dns_sd.h>
 #else
 #include <avahi-client/client.h>
@@ -106,7 +106,7 @@ private:
 
   /* Zeroconf service registration */
 
-#ifdef DARWIN
+#ifdef TARGET_DARWIN
   DNSServiceRef _dnsService = NULL;
   static void ServiceRegistered(
       DNSServiceRef sdRef,

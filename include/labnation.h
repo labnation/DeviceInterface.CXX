@@ -21,7 +21,7 @@
             do { std::fprintf(stderr, "[ERR ] " fmt "\n", ##__VA_ARGS__); } while (0)
 
 
-#if DARWIN
+#if TARGET_DARWIN
     #define PTHREAD_NAME(name) \
         pthread_setname_np(name);
 #else
