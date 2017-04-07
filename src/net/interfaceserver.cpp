@@ -297,7 +297,7 @@ void InterfaceServer::ControlSocketServer() {
           case GET:
             ctrl_msg = (ControllerMessage *)request->data;
             memcpy(response->data, ctrl_msg, sizeof(ControllerMessage));
-            response->length = sizeof(ctrl_msg) - 1 + ctrl_msg->len;
+            response->length = sizeof(ControllerMessage) + ctrl_msg->len;
             _scope->GetControllerRegister(ctrl_msg->ctrl, ctrl_msg->addr, ctrl_msg->len,
                                           ((ControllerMessage*)response->data)->data);
             break;
