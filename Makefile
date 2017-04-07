@@ -21,13 +21,9 @@ LD = $(CROSS_COMPILE)ld
 
 TARGET ?= $(shell uname | tr a-z A-Z)
 CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -I$(PREFIX)/include -MMD -DTARGET_${TARGET} -MP -std=c++11
-LIBS := -lusb-1.0 -lpthread
+LIBS := -lusb-1.0 -lpthread -lstdc++
 LIB_PATH := -L$(PREFIX)/lib
 LDFLAGS += -Wall $(LIBS) $(LIB_PATH)
-
-ifdef STATIC
-LDFLAGS += -static
-endif
 
 $(info $$TARGET is [${TARGET}])
 ifneq (DARWIN,$(TARGET))
