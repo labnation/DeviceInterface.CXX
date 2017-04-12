@@ -87,13 +87,15 @@ private:
   static const int DATA_SOCKET_BUFFER_SIZE = ACQUISITION_PACKET_SIZE * 2;
   static const int HDR_SZ = 4;
   static const int BUF_SIZE = 8 * 1024;
+  static const int MSG_BUF_SIZE = 1024 * 1024;
+
+  uint8_t *tx_buf;
+  uint8_t *msg_buf;
 
   std::function<void(InterfaceServer*)> _stateChanged = NULL;
   const char* SERVICE_TYPE = "_sss._tcp";
   const char* REPLY_DOMAIN = "local.";
   const char* TXT_DATA_PORT = "DATA_PORT";
-  // Max received = header + full acq buf
-  uint8_t smartScopeBuffer[ACQUISITION_PACKET_SIZE];
 
   State _stateRequested = Uninitialized;
   State _state = Uninitialized;

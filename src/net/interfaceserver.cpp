@@ -176,10 +176,7 @@ void* InterfaceServer::ThreadStartControlSocketServer(void * ctx){
 void InterfaceServer::ControlSocketServer() {
   _disconnect_called = false;
 
-  uint8_t tx_buf[BUF_SIZE];
   int ret;
-
-  uint8_t msg_buf[1024*1024];
   uint msg_buf_len = 0;
   uint msg_buf_offset = 0;
   Message *request, *response;
@@ -191,8 +188,6 @@ void InterfaceServer::ControlSocketServer() {
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   std::string serial;
   uint32_t version;
-
-  memset(tx_buf, 0, sizeof(tx_buf));
 
   /* Start control server */
   if((_sock_ctrl_listen = InterfaceServer::StartServer("0")) == -1)
@@ -221,10 +216,16 @@ void InterfaceServer::ControlSocketServer() {
   info("Connection accepted from %s:%d", inet_ntoa(sa_cli.sin_addr), ntohs(sa_cli.sin_port));
   UnregisterService();
   _connected = true;
+
+  tx_buf = new uint8_t[BUF_SIZE];
+  memset(tx_buf, 0, BUF_SIZE);
   response = (Message*)tx_buf;
 
+  msg_buf = new uint8_t[MSG_BUF_SIZE];
+  memset(msg_buf, 0, MSG_BUF_SIZE);
+
   while (_connected) {
-    ret = recv(_sock_ctrl, &msg_buf[msg_buf_len], sizeof(msg_buf) - msg_buf_len, 0);
+    ret = recv(_sock_ctrl, &msg_buf[msg_buf_len], MSG_BUF_SIZE - msg_buf_len, 0);
     if(ret == -1)
       throw NetException("Failed to receive from socket: %s", strerror(errno));
 
@@ -286,7 +287,7 @@ void InterfaceServer::ControlSocketServer() {
             if(_thread_data)
               throw NetException("Should not mix data socket with data through control socket");
             do {
-                response->length = _scope->GetAcquisition(sizeof(tx_buf) - HDR_SZ, response->data);
+                response->length = _scope->GetAcquisition(BUF_SIZE - HDR_SZ, response->data);
             } while(response->length == 0);
             break;
           case SET:
@@ -349,6 +350,9 @@ void InterfaceServer::Disconnect() {
   CleanSocketThread(&_thread_ctrl, &_sock_ctrl_listen, &_sock_ctrl);
   debug("closing data thread/socket");
   CleanSocketThread(&_thread_data, &_sock_data_listen, &_sock_data);
+  debug("Cleaning up message and tx buffers");
+  delete[] msg_buf;
+  delete[] tx_buf;
 }
 
 void InterfaceServer::CleanSocketThread(pthread_t* thread, int *listener_socket, int *socket)
