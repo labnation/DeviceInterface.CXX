@@ -329,21 +329,22 @@ int SmartScopeUsb::UsbCommandHeader(Controller ctrl, Operation op, uint address,
     case FPGA:
       return UsbCommandHeaderI2c((uint8_t)((address >> 8) & 0x7F), op, (uint8_t)(address & 0xFF), length, buffer);
     case AWG:
-      throw ScopeIOException("AWG IO not implemented");
       switch(op) {
         case WRITE:
           return UsbCommandHeaderI2c(FPGA_I2C_ADDRESS_AWG, op, address, length, buffer);
         case WRITE_BEGIN:
-          buffer[1] =  I2C_WRITE_START;
+          buffer[1] = I2C_WRITE_START;
           buffer[2] = length + 2;
           buffer[3] = FPGA_I2C_ADDRESS_AWG << 1;
           buffer[4] = address;
           return 5;
         case WRITE_BODY:
           buffer[1] = I2C_WRITE_BULK;
+          buffer[2] = (uint8_t)length;
           return 3;
         case WRITE_END:
           buffer[1] = I2C_WRITE_STOP;
+          buffer[2] = (uint8_t)length;
           return 3;
         case READ:
           throw ScopeIOException("Can't read out AWG");
