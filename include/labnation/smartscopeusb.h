@@ -7,7 +7,7 @@
 #include "smartscope.h"
 
 namespace labnation {
-    
+
 class ScopeIOException: public std::exception {
 private:
     std::string _message;
@@ -22,7 +22,7 @@ class SmartScopeUsb : public Hardware {
 public:
     const static int VID;
     const static std::vector<int> PIDs;
-    
+
     enum PicCommands
     {
         PIC_VERSION = 1,
@@ -62,7 +62,7 @@ public:
         Armded = 64,
         IsFullAcqusition = 128,
     };
-    
+
     struct __attribute__ ((__packed__)) Header
     {
         uint8_t magic[2];           //0-1
@@ -90,7 +90,7 @@ public:
 
     /* hardware abstract class implementation */
     std::string GetSerial();
-    
+
     /* SmartScope abstract class implementation */
     void GetControllerRegister(Controller ctrl, uint address, int length, uint8_t* data) ;
     void SetControllerRegister(Controller ctrl, uint address, int length, uint8_t* data) ;
@@ -101,7 +101,7 @@ public:
     void FlashFpga(int length, uint8_t* firmware);
     uint32_t GetPicFirmwareVersion();
     bool IsDestroyed() ;
-    void Destroy() ;    
+    void Destroy() ;
 
     void WriteControlBytes(int length, uint8_t* message);
     void WriteControlBytesBulk(int length, uint8_t* message);
@@ -119,7 +119,7 @@ private:
     libusb_device_handle* _device;
     libusb_device_descriptor _device_desc;
     bool _destroyed;
-    
+
     const static int SZ_SERIAL = 255;
     unsigned char _serial[SZ_SERIAL];
 

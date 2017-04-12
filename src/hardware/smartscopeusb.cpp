@@ -5,7 +5,7 @@
 #include <stdarg.h>
 
 namespace labnation {
-    
+
 ScopeIOException::ScopeIOException(const char* message, ...) {
   char msg[255];
   va_list vl;
@@ -29,21 +29,21 @@ SmartScopeUsb::SmartScopeUsb(libusb_device* d)
   if(err)
     throw ScopeIOException("Failed to set configuration [%s]",
       libusb_error_name(err));
-    
+
   /* Open and claim */
   err = libusb_open(d, &_device);
   if(err)
-    throw ScopeIOException("Failed to open usb device [%s]", 
+    throw ScopeIOException("Failed to open usb device [%s]",
       libusb_error_name(err));
 
   err = libusb_set_configuration(_device, 1);
   if(err)
-    throw ScopeIOException("Failed to set configuration [%s]", 
+    throw ScopeIOException("Failed to set configuration [%s]",
       libusb_error_name(err));
 
   err = libusb_claim_interface(_device, 0);
   if(err)
-    throw ScopeIOException("Failed to claim interface [%s]", 
+    throw ScopeIOException("Failed to claim interface [%s]",
       libusb_error_name(err));
 
   /* Get serial */
@@ -55,7 +55,7 @@ SmartScopeUsb::~SmartScopeUsb()
 {
   Destroy();
 }
-bool SmartScopeUsb::IsDestroyed() 
+bool SmartScopeUsb::IsDestroyed()
 {
   return _destroyed;
 }
@@ -93,7 +93,7 @@ void SmartScopeUsb::WriteControlBytesBulk(int length, uint8_t* message, int offs
   int n = 0;
   int err = libusb_bulk_transfer(_device, EP_CMD_WRITE, &message[offset], length, &n, USB_TIMEOUT_CTRL);
   if(err)
-    throw ScopeIOException("Failed write control bytes [%s]", 
+    throw ScopeIOException("Failed write control bytes [%s]",
       libusb_error_name(err));
   if(n != length)
     throw ScopeIOException("Only wrote %d out of %d bytes", n, length);
@@ -104,10 +104,10 @@ void SmartScopeUsb::ReadControlBytes(int length, uint8_t* buffer, int offset = 0
   int n = 0;
   int err = libusb_bulk_transfer(_device, EP_CMD_READ, &buffer[offset], length, &n, USB_TIMEOUT_CTRL);
   if(err)
-    throw ScopeIOException("Failed read control bytes [%s]", 
+    throw ScopeIOException("Failed read control bytes [%s]",
       libusb_error_name(err));
   if(n != length)
-    throw ScopeIOException("Only read %d out of %d bytes", n, length);  
+    throw ScopeIOException("Only read %d out of %d bytes", n, length);
 }
 
 void SmartScopeUsb::FlushDataPipe()
@@ -127,7 +127,7 @@ void SmartScopeUsb::GetData(int length, uint8_t* buffer, int offset)
   int n = 0;
   int err = libusb_bulk_transfer(_device, EP_DATA, &buffer[offset], length, &n, USB_TIMEOUT_DATA);
   if(err)
-    throw ScopeIOException("Failed get data [%s]", 
+    throw ScopeIOException("Failed get data [%s]",
       libusb_error_name(err));
   if(n != length)
     throw ScopeIOException("Only received %d out of %d bytes", n, length);
@@ -155,7 +155,7 @@ void SmartScopeUsb::SetControllerRegister(Controller ctrl, uint address, int len
 {
   uint8_t msg[32];
   int msgLen = 0;
-  
+
   if (data != NULL && length > I2C_MAX_WRITE_LENGTH) {
     uint offset = 0;
     int bytesLeft = length;
@@ -182,7 +182,7 @@ void SmartScopeUsb::SetControllerRegister(Controller ctrl, uint address, int len
     {
       int length = bytesLeft > I2C_MAX_WRITE_LENGTH_BULK ? I2C_MAX_WRITE_LENGTH_BULK : bytesLeft;
       msgLen = UsbCommandHeader(ctrl, WRITE_BODY, address, length, msg);
-    
+
       memcpy(&msg[msgLen], &data[offset], length);
       WriteControlBytes(32, msg);
       offset += length;
@@ -211,8 +211,8 @@ uint32_t SmartScopeUsb::GetPicFirmwareVersion()
   SendCommand(PIC_VERSION);
   uint8_t response[16];
   ReadControlBytes(16, response);
-  return (response[6] << 16) + 
-    (response[5] <<  8) + 
+  return (response[6] << 16) +
+    (response[5] <<  8) +
     (response[4] <<  0);
 }
 
@@ -242,12 +242,12 @@ void SmartScopeUsb::FlashFpga(int length, uint8_t* firmware)
    * A possible explanation is that in the second run, caches
    * are hit and the time between the PROGRAM_FPGA_START command
    * and the first bitstream bytes is smaller than on the first run.
-   * 
+   *
    * Indeed, if this time is smaller than the time for the INIT bit
    * (see spartan 6 ug380 fig 2.4) to rise, the first bitstream data
    * is missed and the configuration fails.
    */
-  
+
   //FIXME: can be shorter prolly
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
@@ -357,7 +357,7 @@ int SmartScopeUsb::UsbCommandHeaderI2c(uint8_t I2cAddress, Operation op, uint ad
 {
   //Most common, will be overridden if necessary
   buffer[0] = HEADER_CMD_BYTE;
-  
+
   switch(op) {
     case WRITE:
       buffer[1] = I2C_WRITE;
@@ -373,5 +373,5 @@ int SmartScopeUsb::UsbCommandHeaderI2c(uint8_t I2cAddress, Operation op, uint ad
     default:
       throw ScopeIOException("Unsupported operation for I2C Header");}
   }
-    
+
 }
