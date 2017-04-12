@@ -6,8 +6,6 @@
 #include <labnation.h>
 #include <labnation/smartscopeusb.h>
 #include <labnation/interfaceserver.h>
-#include "../blobs/SmartScope_A12.h"
-
 
 using namespace labnation;
 
