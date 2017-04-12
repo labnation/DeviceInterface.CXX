@@ -8,15 +8,15 @@
 
 #ifdef DEBUG
 #define debug(fmt, ...) \
-            do { std::fprintf(stderr, "[DBG ] " fmt "\n", ##__VA_ARGS__); } while (0)
+            do { std::fprintf(stdout, "[DBG ] " fmt "\n", ##__VA_ARGS__); } while (0)
 #else
 #define debug(fmt, ...)
 #endif
 
 #define warn(fmt, ...) \
-            do { std::fprintf(stderr, "[WARN] " fmt "\n", ##__VA_ARGS__); } while (0)
+            do { std::fprintf(stdout, "[WARN] " fmt "\n", ##__VA_ARGS__); } while (0)
 #define info(fmt, ...) \
-            do { std::fprintf(stderr, "[INFO] " fmt "\n", ##__VA_ARGS__); } while (0)
+            do { std::fprintf(stdout, "[INFO] " fmt "\n", ##__VA_ARGS__); } while (0)
 #define error(fmt, ...) \
             do { std::fprintf(stderr, "[ERR ] " fmt "\n", ##__VA_ARGS__); } while (0)
 
