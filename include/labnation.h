@@ -21,11 +21,11 @@
             do { std::fprintf(stderr, "[ERR ] " fmt "\n", ##__VA_ARGS__); } while (0)
 
 
-#if TARGET_DARWIN
+#if __MACH__
     #define PTHREAD_NAME(name) \
         pthread_setname_np(name);
 #else
-#ifdef TARGET_OPENWRT
+#ifdef __UCLIBC__
     #define PTHREAD_NAME(name)
 #else
     #define PTHREAD_NAME(name) \

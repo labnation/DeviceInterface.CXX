@@ -15,18 +15,17 @@ OBJS := $(SRCS:.cpp=.cpp.o)
 OBJS := $(addprefix $(OUT_DIR)/,$(OBJS))
 DEPS := $(OBJS:.o=.d)
 
-PREFIX ?= /usr
 CC = $(CROSS_COMPILE)c++
 LD = $(CROSS_COMPILE)ld
 
-TARGET ?= $(shell uname | tr a-z A-Z)
-CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -I$(PREFIX)/include -MMD -DTARGET_${TARGET} -MP -std=c++11
+CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
 LIBS := -lusb-1.0 -lpthread -lstdc++
-LIB_PATH := -L$(PREFIX)/lib
-LDFLAGS += -Wall $(LIBS) $(LIB_PATH)
+LDFLAGS += -Wall $(LIBS)
 
-$(info $$TARGET is [${TARGET}])
-ifneq (DARWIN,$(TARGET))
+
+ifdef DNSSD
+CCFLAGS += -DDNSSD
+else
 LIBS += -lavahi-client -lavahi-common -ldbus-1
 endif
 

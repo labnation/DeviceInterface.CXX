@@ -1,5 +1,5 @@
 #include <labnation/interfaceserver.h>
-#ifndef TARGET_DARWIN
+#ifndef DNSSD
 #include <avahi-common/error.h>
 #endif
 #include <labnation.h>
@@ -26,7 +26,7 @@ NetException::NetException(const char* message, ...) {
 
 InterfaceServer::InterfaceServer(SmartScopeUsb* scope) {
   debug("====================NEW SERVER====================");
-#ifndef TARGET_DARWIN
+#ifndef DNSSD
   _avahi_poll = avahi_threaded_poll_new();
   _avahi_client = avahi_client_new(avahi_threaded_poll_get(_avahi_poll), AVAHI_CLIENT_NO_FAIL,
                                    InterfaceServer::AvahiCallback, this, NULL);
@@ -39,7 +39,7 @@ InterfaceServer::InterfaceServer(SmartScopeUsb* scope) {
 }
 
 InterfaceServer::~InterfaceServer() {
-#ifndef TARGET_DARWIN
+#ifndef DNSSD
   avahi_threaded_poll_stop(_avahi_poll);
   avahi_client_free(_avahi_client);
   avahi_threaded_poll_free(_avahi_poll);
@@ -409,7 +409,7 @@ InterfaceServer::State InterfaceServer::GetState() { return _state; }
 
 void InterfaceServer::RegisterService() {
   std::string name = "SmartScope []";
-#ifdef TARGET_DARWIN
+#ifdef DNSSD
   DNSServiceErrorType err = DNSServiceRegister(
         &_dnsService, 0, 0, name.c_str(), SERVICE_TYPE,
         NULL, NULL, htons(_port), 0, NULL, ServiceRegistered, this);
@@ -431,7 +431,7 @@ void InterfaceServer::RegisterService() {
   info("Zeroconf service registered");
 }
 
-#ifdef TARGET_DARWIN
+#ifdef DNSSD
 void InterfaceServer::ServiceRegistered(
     DNSServiceRef sdRef,
     DNSServiceFlags flags,
@@ -446,7 +446,7 @@ void InterfaceServer::ServiceRegistered(
 }
 #endif
 
-#ifndef TARGET_DARWIN
+#ifndef DNSSD
 void InterfaceServer::AvahiCallback(AvahiClient *s, AvahiClientState state, void *data) {
   #define AVAHI_CLIENT_MSG "Avahi client state [%s]"
   switch(state)
@@ -484,7 +484,7 @@ void InterfaceServer::AvahiGroupChanged(AvahiEntryGroup *g, AvahiEntryGroupState
 #endif
 
 void InterfaceServer::UnregisterService() {
-#ifdef TARGET_DARWIN
+#ifdef DNSSD
   if(_dnsService != NULL)
     DNSServiceRefDeallocate(_dnsService);
 #else
