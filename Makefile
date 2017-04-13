@@ -35,12 +35,16 @@ else
 CCFLAGS += -O3
 endif
 
-.PHONY: all clean clear
+.PHONY: all clean clear install
 
 all: smartscopeserver
 
 clean:
 	-rm -rf $(OUT_DIR)
+
+install: all
+	install -m 755 -d $(DESTDIR)/usr/bin
+	install -m 755 smartscopeserver $(DESTDIR)/usr/bin
 
 -include $(DEPS)
 
