@@ -1,8 +1,9 @@
 # Directories
 OUT_DIR := build
 SRC_DIR := src
-LIB_DIR := lib
-INCLUDE_DIR := include
+LIB_DIR := lib $(PREFIX)/lib
+LIB_DIR_PARAM :=$(foreach d, $(LIB_DIR), -L$d)
+INCLUDE_DIR := include $(PREFIX)/include
 INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
@@ -20,7 +21,7 @@ LD = $(CROSS_COMPILE)ld
 
 CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
 LIBS := -lusb-1.0 -lpthread -lstdc++
-LDFLAGS += -Wall $(LIBS)
+LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
 
 
 ifdef DNSSD
@@ -50,7 +51,7 @@ install: all
 
 smartscopeserver: $(OBJS)
 	@printf " Making %s %s\n" $@ $^
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $(OUT_DIR)/$@ $^ $(LDFLAGS)
 
 $(OUT_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	@printf "  CC      %s\n" $@
