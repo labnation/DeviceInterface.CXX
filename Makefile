@@ -45,7 +45,7 @@ clean:
 
 install: all
 	install -m 755 -d $(DESTDIR)/usr/bin
-	install -m 755 smartscopeserver $(DESTDIR)/usr/bin
+	install -m 755 $(OUT_DIR)/smartscopeserver $(DESTDIR)/usr/bin
 
 -include $(DEPS)
 
