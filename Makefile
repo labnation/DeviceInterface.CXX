@@ -1,7 +1,7 @@
 # Directories
 OUT_DIR := build
 SRC_DIR := src
-LIB_DIR := lib $(PREFIX)/lib
+LIB_DIR := $(PREFIX)/lib
 LIB_DIR_PARAM :=$(foreach d, $(LIB_DIR), -L$d)
 INCLUDE_DIR := include $(PREFIX)/include
 INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
