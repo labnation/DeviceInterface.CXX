@@ -1,4 +1,5 @@
 # Directories
+PREFIX ?= /usr
 OUT_DIR := build
 SRC_DIR := src
 LIB_DIR := $(PREFIX)/lib
