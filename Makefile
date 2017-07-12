@@ -28,7 +28,7 @@ LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
 ifdef DNSSD
 CCFLAGS += -DDNSSD
 else
-LIBS += -lavahi-client -lavahi-common -ldbus-1
+LIBS += -lavahi-client -lavahi-common
 endif
 
 ifdef DEBUG
