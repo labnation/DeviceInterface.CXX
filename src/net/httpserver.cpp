@@ -3,7 +3,6 @@
 
 namespace labnation {
   HttpServer::HttpServer() {
-    debug("Constructing HTTP server");
     mg_mgr_init(&_manager, this);
   }
 
@@ -14,88 +13,49 @@ namespace labnation {
 
   void HttpServer::Handler(struct mg_connection* conn, int ev, void *p) {
     struct http_message* hm;
-    Command comm = UNDEFINED;
-    std::string response = std::string("");
+
+    HttpServer* s = (HttpServer*)conn->mgr->user_data;
+    std::string response = std::string();
 
     switch(ev) {
       case 0:
-        //HttpServer* s = (HttpServer*)p;
         return;
       case MG_EV_HTTP_REQUEST:
         hm = (struct http_message *) p;
-        debug("HTTP request arrived");
-        debug("BODY: %s", hm->message.p);
 
-        comm = ParseUri(&hm->uri);
-        switch(comm) {
-          case SERIAL:
-            response += "SERIAL";
+        // Match URI with route map
+        for(std::map<const char *,
+              std::function<ROUTE_HANDLER()>>::iterator iter = s->routes.begin();
+              iter != s->routes.end(); ++iter) {
+          debug("Testing route to %s", iter->first);
+          if(mg_vcmp(&hm->uri, iter->first)==0) {
+            response = iter->second(s, hm);
             break;
-          case GET:
-            response += "Getting";
-            break;
-          case SET:
-            response += "Setting";
-            break;
-          case DATA:
-            response += "Data";
-            break;
-          case PIC_FW_VERSION:
-            response += "PIC firmware version";
-            break;
-          case FLASH_FPGA:
-            response += "Flashing fpga";
-            break;
-          case ACQUISITION:
-            response += "Acqusition smth";
-            break;
-          case FLUSH:
-            response += "Flushing USB";
-            break;
-          case DATA_PORT:
-            response += "Data port not supported";
-            break;
-          case DISCONNECT:
-            response += "Disconnecting";
-            break;
-          default:
-            response += "UNKNOWN";
+          }
         }
 
-        mg_send_head(conn, 200, response.length(), NULL);
-        mg_printf(conn, "%s", response.c_str());
-
-        break;
+        //Serve response if we got any, otherwise, serve a 404
+        if(response.empty()) {
+          response = "We don't do that command";
+          mg_send_head(conn, 404, response.length(), NULL);
+          mg_printf(conn, "%s", response.c_str());
+          break;
+        } else {
+          mg_send_head(conn, 200, response.length(), NULL);
+          mg_printf(conn, "%s", response.c_str());
+          break;
+        }
       default:
         debug("Don't know what to do with event %d", ev);
     }
   }
 
-  Command HttpServer::ParseUri(mg_str* uri) {
-    debug("%s", std::string(uri->p, uri->len).c_str());
-    if(mg_vcmp(uri, "/serial")==0)
-      return SERIAL;
-    if(mg_vcmp(uri, "/get")==0)
-      return GET;
-    if(mg_vcmp(uri, "/set")==0)
-      return SET;
-    if(mg_vcmp(uri, "/data")==0)
-      return DATA;
-    if(mg_vcmp(uri, "/pic_fw_version")==0)
-      return PIC_FW_VERSION;
-    if(mg_vcmp(uri, "/flash_fpga")==0)
-      return FLASH_FPGA;
-    if(mg_vcmp(uri, "/acquisition")==0)
-      return ACQUISITION;
-    if(mg_vcmp(uri, "/flush")==0)
-      return FLUSH;
-    if(mg_vcmp(uri, "/data_port")==0)
-      return DATA_PORT;
-    if(mg_vcmp(uri, "/disconnect")==0)
-      return DISCONNECT;
-    return UNDEFINED;
+  ROUTE_HANDLER(HttpServer::ServeSerial) {
+    return "serial";
   }
-
+  ROUTE_HANDLER(HttpServer::ServeUnknown) {
+    return std::string(m->uri.p, m->uri.len) + " - Not supported yet";
+  }
 
   void HttpServer::Start() {
     debug("Starting HTTP server");
@@ -105,11 +65,11 @@ namespace labnation {
       throw NetException("Failed to make connection");
     }
 
-    debug("The connection is %p", _connection);
     mg_set_protocol_http_websocket(_connection);
 
+    info("HTTP server started");
     for (;;) {
-      mg_mgr_poll(&_manager, 1000);
+      mg_mgr_poll(&_manager, 5000);
       //find scope...
       _scope = NULL;
     }
