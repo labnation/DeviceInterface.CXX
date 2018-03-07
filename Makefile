@@ -11,6 +11,7 @@ SRCS := \
 	main.cpp \
         hardware/smartscopeusb.cpp \
         net/interfaceserver.cpp \
+        net/httpserver.cpp \
         utils.cpp
 
 OBJS := $(SRCS:.cpp=.cpp.o)
@@ -21,7 +22,7 @@ CC = $(CROSS_COMPILE)c++
 LD = $(CROSS_COMPILE)ld
 
 CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
-LIBS := -lusb-1.0 -lpthread -lstdc++
+LIBS := -lusb-1.0 -lpthread -lstdc++ -lmongoose
 LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
 
 
