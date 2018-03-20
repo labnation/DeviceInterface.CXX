@@ -1,10 +1,11 @@
-#ifndef LABNATION_SMARTSCOPE_H
-#define LABNATION_SMARTSCOPE_H
+#ifndef _LABNATION_SMARTSCOPE_REGS_H
+#define _LABNATION_SMARTSCOPE_REGS_H
 
 #include <map>
 #include <vector>
 
 namespace labnation {
+
 const int HDR_OFFSET = 15;
 const int SZ_HDR = 64;
 const int PACKAGE_MAX = 64;
@@ -190,6 +191,5 @@ static std::vector<REG> ViewRegisters =
   VIEW_EXCESS_B1,
 };
 
-}
 
-#endif // LABNATION_SMARTSCOPE_H
+#endif // _LABNATION_SMARTSCOPE_REGS_H

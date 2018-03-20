@@ -9,6 +9,8 @@ INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
 	main.cpp \
+        hardware/memory.cpp \
+        hardware/register.cpp \
         hardware/smartscopeusb.cpp \
         net/interfaceserver.cpp \
         net/httpserver.cpp \

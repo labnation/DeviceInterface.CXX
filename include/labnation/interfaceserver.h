@@ -1,7 +1,7 @@
 #ifndef _LABNATION_INTERFACESERVER_H
 #define _LABNATION_INTERFACESERVER_H
 
-#include "smartscope.h"
+#include "smartscope_regs.h"
 #include "smartscopeusb.h"
 #include "server.h"
 

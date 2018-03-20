@@ -4,7 +4,7 @@
 #include <libusb-1.0/libusb.h>
 #include <vector>
 #include "hardware.h"
-#include "smartscope.h"
+#include "smartscope_regs.h"
 
 namespace labnation {
 
