@@ -9,41 +9,41 @@ namespace labnation {
 
 class Channel {
 
-public:
-  std::string name;
-  uint32_t value;
-  const std::type_info* datatype;
-  static std::vector<Channel*> list;
+  public:
+    std::string name;
+    uint32_t value;
+    const std::type_info* datatype;
+    static std::vector<Channel*> list;
 
-  Channel(std::string name, uint32_t value, const std::type_info * datatype)
-  {
-    this->name = name;
-    this->value = value;
-    this->datatype =  datatype;
+    Channel(std::string name, uint32_t value, const std::type_info * datatype)
+    {
+      this->name = name;
+      this->value = value;
+      this->datatype =  datatype;
 
-    list.push_back(this);
-  }
-};
-
-class AnalogChannel: Channel {
-
-public:
-  static std::vector<AnalogChannel*> list;
-
-  AnalogChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(float)) {
-    list.push_back(this);
-  }
+      list.push_back(this);
+    }
 
 };
 
-class DigitalChannel: Channel {
+class AnalogChannel: public Channel {
+  public:
+    static std::vector<AnalogChannel*> list;
 
-public:
-  static std::vector<DigitalChannel*> list;
+    AnalogChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(float)) {
+      list.push_back(this);
+    }
 
-  DigitalChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(bool)) {
-    DigitalChannel::list.push_back(this);
-  }
+};
+
+class DigitalChannel: public Channel {
+
+  public:
+    static std::vector<DigitalChannel*> list;
+
+    DigitalChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(bool)) {
+      DigitalChannel::list.push_back(this);
+    }
 
 };
 
