@@ -11,7 +11,7 @@ class Memory {
 
 public:
 
-  std::map<uint32_t, Register> registers;
+  std::map<uint32_t, Register*> registers;
 
   /*!
    * \brief Write register specified by address
@@ -36,7 +36,7 @@ public:
    */
   virtual bool Commit();
 
-  virtual Register operator[](uint32_t address);
+  virtual Register* operator[](uint32_t address);
 
 };
 

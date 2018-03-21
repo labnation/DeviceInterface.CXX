@@ -9,7 +9,7 @@ void Memory::WriteRange(uint32_t from, uint32_t until) {
   }
 }
 
-Register Memory::operator [](uint32_t address) {
+Register* Memory::operator [](uint32_t address) {
   return registers[address];
 }
 
@@ -22,9 +22,9 @@ void Memory::Read(uint32_t address) {
 }
 
 bool Memory::Commit() {
-  std::map<uint32_t, Register>::iterator it =
+  std::map<uint32_t, Register*>::iterator it =
       std::find_if(registers.begin(), registers.end(),
-        [](const std::pair<uint32_t, Register> p) { return p.second.dirty; });
+        [](const std::pair<uint32_t, Register*> p) { return p.second->dirty; });
   return false;
 }
 
