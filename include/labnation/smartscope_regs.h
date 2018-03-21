@@ -191,5 +191,6 @@ static std::vector<REG> ViewRegisters =
   VIEW_EXCESS_B1,
 };
 
+}
 
 #endif // _LABNATION_SMARTSCOPE_REGS_H
