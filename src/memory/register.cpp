@@ -1,34 +1,43 @@
-#include <memory/register.h>
+#include <labnation.h>
+#include <labnation/memory/register.h>
+#include <labnation/memory/memory.h>
 
 namespace labnation {
 
-Register::Register(Memory m, uint32_t address, string name) {
-  this->memory = m;
+Register::Register() {
+  throw Exception("Register empty constructor shouldn't be used");
+}
+
+Register::Register(void* m, uint32_t address, std::string name) {
+  this->_memory = m;
   this->address = address;
   this->name = name;
   this->dirty = false;
 }
 
-void Register::write() {
-  _value = value;
-  memory.write(address);
+void Register::Write() {
+  debug("Writing register %s [0x%02X] (%d)", name, address, dirty);
+  //static_cast<Memory*>(memory)->write(address);
+  memory->Write(address);
 }
 
-void Register::write(uint32_t value) {
+void Register::Write(uint32_t value) {
   _value = value;
-  write();
+  Write();
 }
 
-Register Register::read() {
-  memory.read(address);
+Register* Register::Read() {
+  debug("Reading register %s [0x%02X] (%d)", name, address, dirty);
+  //static_cast<Memory*>(memory)->read(address);
+  memory->Read(address);
   return this;
 }
 
-uint32_t Register::get() {
+uint32_t Register::Get() {
   return _value;
 }
 
-void Register::set(uint32_t value) {
+void Register::Set(uint32_t value) {
   _value = value;
 }
 

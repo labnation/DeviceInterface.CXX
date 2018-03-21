@@ -1,6 +1,8 @@
-#ifndef _LABNATIONMEMORY_H
-#define _LABNATIONMEMORY_H
+#ifndef _LABNATION_MEMORY_H
+#define _LABNATION_MEMORY_H
 
+#include <cstdint>
+#include <map>
 #include "register.h"
 
 namespace labnation {
@@ -15,18 +17,24 @@ public:
    * \brief Write register specified by address
    * \param address the register address to write
    */
-  virtual void write(uint32_t address) = 0;
+  virtual void Write(uint32_t address);
   /*!
    * \brief Read register specified by address
    * \param address the register address to read
    */
-  virtual void read(uint32_t address) = 0;
+  virtual void Read(uint32_t address);
   /*!
    * \brief Write register in range [from, until]
    * \param from first address to write
    * \param until last address to write
    */
-  virtual void write_range(uint32_t from, uint32_t until);
+  virtual void WriteRange(uint32_t from, uint32_t until);
+
+  /*!
+   * \brief Writes all dirty registers
+   * \return True if at least 1 register was written
+   */
+  virtual bool Commit();
 
   virtual Register operator[](uint32_t address);
 
@@ -34,4 +42,4 @@ public:
 
 }
 
-#endif // _LABNATIONMEMORY_H
+#endif // _LABNATION_MEMORY_H
