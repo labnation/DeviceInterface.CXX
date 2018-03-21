@@ -13,7 +13,7 @@ public:
   std::string name;
   uint32_t value;
   const std::type_info* datatype;
-  static std::vector<Channel> list;
+  static std::vector<Channel*> list;
 
   Channel(std::string name, uint32_t value, const std::type_info * datatype)
   {
@@ -21,17 +21,17 @@ public:
     this->value = value;
     this->datatype =  datatype;
 
-    list.push_back(*this);
+    list.push_back(this);
   }
 };
 
 class AnalogChannel: Channel {
 
 public:
-  static std::vector<AnalogChannel> list;
+  static std::vector<AnalogChannel*> list;
 
   AnalogChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(float)) {
-    list.push_back(*this);
+    list.push_back(this);
   }
 
 };
@@ -39,10 +39,10 @@ public:
 class DigitalChannel: Channel {
 
 public:
-  static std::vector<DigitalChannel> list;
+  static std::vector<DigitalChannel*> list;
 
   DigitalChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(bool)) {
-    DigitalChannel::list.push_back(*this);
+    DigitalChannel::list.push_back(this);
   }
 
 };
