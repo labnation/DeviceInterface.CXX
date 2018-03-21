@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
 #ifdef DEBUG
 #define debug(fmt, ...) \
@@ -32,5 +33,19 @@
         pthread_setname_np(pthread_self(), name);
 #endif
 #endif
+
+namespace labnation {
+
+class Exception: public std::exception {
+private:
+    std::string _message;
+public:
+    explicit Exception(const char* message, ...);
+    virtual const char* what() const throw() {
+        return _message.c_str();
+    }
+};
+
+}
 
 #endif //_LABNATION_H
