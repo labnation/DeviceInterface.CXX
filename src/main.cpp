@@ -1,4 +1,4 @@
-#define HTTP 1
+//#define HTTP
 
 #include <iostream>
 #include <thread>
@@ -7,6 +7,7 @@
 #include <libusb-1.0/libusb.h>
 #include <labnation.h>
 #include <labnation/smartscopeusb.h>
+#include <labnation/smartscope.h>
 #ifdef HTTP
 #include <labnation/httpserver.h>
 #else
@@ -19,6 +20,7 @@ libusb_context* usb_ctx;
 libusb_device** devices;
 libusb_device_descriptor desc;
 SmartScopeUsb* scope;
+SmartScope* smartscope;
 #ifdef HTTP
 HttpServer* server;
 #else
@@ -29,11 +31,17 @@ int main(int argc, char *argv[])
 {
   libusb_init(NULL);
   //libusb_set_debug(usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
-#if HTTP
+#ifdef HTTP
   server = new HttpServer();
   server->Start();
   delete(server);
 #else
+#ifdef TEST
+  debug("TESTING...");
+  smartscope = new SmartScope(NULL);
+  delete(smartscope);
+#else
+  debug("Real deal...");
   while(true)
   {
     int n = libusb_get_device_list(NULL, &devices);
@@ -62,6 +70,7 @@ int main(int argc, char *argv[])
     libusb_free_device_list(devices, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
+#endif
 #endif
   libusb_exit(NULL);
 }

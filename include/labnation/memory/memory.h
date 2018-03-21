@@ -2,8 +2,10 @@
 #define _LABNATION_MEMORY_H
 
 #include <cstdint>
+#include <string>
 #include <map>
 #include "register.h"
+#include "../smartscopeusb.h"
 
 namespace labnation {
 
@@ -11,24 +13,26 @@ class Memory {
 
 public:
 
-  std::map<uint32_t, Register*> registers;
+  virtual ~Memory();
+  std::string name;
+  std::map<uint, Register*> registers;
 
   /*!
    * \brief Write register specified by address
    * \param address the register address to write
    */
-  virtual void Write(uint32_t address);
+  virtual void Write(uint address);
   /*!
    * \brief Read register specified by address
    * \param address the register address to read
    */
-  virtual void Read(uint32_t address);
+  virtual void Read(uint address);
   /*!
    * \brief Write register in range [from, until]
    * \param from first address to write
    * \param until last address to write
    */
-  virtual void WriteRange(uint32_t from, uint32_t until);
+  virtual void WriteRange(uint from, uint until);
 
   /*!
    * \brief Writes all dirty registers
@@ -36,9 +40,23 @@ public:
    */
   virtual bool Commit();
 
-  virtual Register* operator[](uint32_t address);
+  virtual Register* operator[](uint address);
 
 };
+
+class PicMemory : public Memory {
+
+public:
+  PicMemory(SmartScopeUsb* interface);
+  void Write(uint address);
+  void Read(uint address);
+
+private:
+  SmartScopeUsb* _interface;
+};
+
+
+
 
 }
 

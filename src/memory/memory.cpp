@@ -3,28 +3,36 @@
 
 namespace labnation {
 
-void Memory::WriteRange(uint32_t from, uint32_t until) {
+Memory::~Memory() {
+  debug("Destroying memory %s", name.c_str());
+  for(auto r : registers) {
+    debug("Destroying register %s", r.second->name.c_str());
+    delete(r.second);
+  }
+}
+
+void Memory::WriteRange(uint from, uint until) {
   for(uint32_t i = from; i <= until; i++) {
     Write(i);
   }
 }
 
-Register* Memory::operator [](uint32_t address) {
+Register* Memory::operator [](uint address) {
   return registers[address];
 }
 
-void Memory::Write(uint32_t address) {
+void Memory::Write(uint address) {
   throw Exception("Write not implemented for generic memory");
 }
 
-void Memory::Read(uint32_t address) {
+void Memory::Read(uint address) {
   throw Exception("Read not implemented for generic memory");
 }
 
 bool Memory::Commit() {
-  std::map<uint32_t, Register*>::iterator it =
+  std::map<uint, Register*>::iterator it =
       std::find_if(registers.begin(), registers.end(),
-        [](const std::pair<uint32_t, Register*> p) { return p.second->dirty; });
+        [](const std::pair<uint, Register*> p) { return p.second->dirty; });
   return false;
 }
 

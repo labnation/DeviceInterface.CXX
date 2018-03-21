@@ -9,9 +9,14 @@ INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
 	main.cpp \
-        hardware/memory.cpp \
-        hardware/register.cpp \
+        labnation.cpp \
+        channel.cpp \
+        scope.cpp \
+        memory/memory.cpp \
+        memory/register.cpp \
+        memory/pic_memory.cpp \
         hardware/smartscopeusb.cpp \
+        hardware/smartscope.cpp \
         net/interfaceserver.cpp \
         net/httpserver.cpp \
         utils.cpp
@@ -35,7 +40,7 @@ LIBS += -lavahi-client -lavahi-common -ldbus-1
 endif
 
 ifdef DEBUG
-CCFLAGS += -DDEBUG
+CCFLAGS += -DDEBUG -DTEST
 else
 CCFLAGS += -O3
 endif

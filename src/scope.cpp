@@ -6,7 +6,7 @@ namespace labnation {
 
 TriggerValue::TriggerValue() {
   for (auto ch: DigitalChannel::list) {
-      debug("Setting trigger value %s to X", ch->name);
+      debug("Setting trigger value %s to X", ch->name.c_str());
       digital[ch] = X;
     }
 }

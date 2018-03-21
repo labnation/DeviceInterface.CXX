@@ -21,12 +21,13 @@ public:
   void Write();
   void Write(uint32_t value);
   bool dirty;
+  uint32_t _value;
 
   #define memory static_cast<Memory*>(_memory)
 
 private:
   void* _memory;
-  uint32_t _value;
+
 
 };
 
