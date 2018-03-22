@@ -18,7 +18,13 @@ public:
   bool SuspendViewportUpdates;
   std::vector<Memory*> memories;
 
-  PicMemory* pic_memory;
+  FpgaSettings* fpga_settings;
+  FpgaRom* fpga_rom;
+  FpgaStrobes* fpga_strobes;
+  PicMemory* pic;
+  Adc* adc;
+
+
   /*
 
   public Memories.ByteMemoryEnum<REG> FpgaSettingsMemory { get; private set; }
