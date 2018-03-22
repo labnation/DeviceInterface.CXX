@@ -10,11 +10,10 @@ namespace labnation {
 class Register {
 
 public:
-  std::string name;
+  const char * name;
   uint32_t address;
 
-  Register();
-  Register(void* memory, uint32_t address, std::string name);
+  Register(void* memory, uint32_t address, const char * name);
   void Set(uint32_t value);
   uint32_t Get();
   Register* Read();

@@ -14,7 +14,8 @@ SRCS := \
         scope.cpp \
         memory/memory.cpp \
         memory/register.cpp \
-        memory/pic_memory.cpp \
+        memory/pic.cpp \
+        memory/fpga.cpp \
         hardware/smartscopeusb.cpp \
         hardware/smartscope.cpp \
         net/interfaceserver.cpp \
