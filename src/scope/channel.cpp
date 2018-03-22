@@ -1,4 +1,4 @@
-#include <labnation/channel.h>
+#include <labnation/scope/channel.h>
 #include <vector>
 
 namespace labnation {

@@ -1,10 +1,10 @@
 #ifndef LABNATION_SMARTSCOPE_H
 #define LABNATION_SMARTSCOPE_H
 
+#include "../memory/memory.h"
+#include "../memory/register.h"
+#include "../hardware/smartscopeusb.h"
 #include "channel.h"
-#include "memory/memory.h"
-#include "memory/register.h"
-#include "smartscopeusb.h"
 #include "scope.h"
 #include "serial.h"
 #include <cmath>

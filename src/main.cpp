@@ -6,12 +6,17 @@
 #include <cstring>
 #include <libusb-1.0/libusb.h>
 #include <labnation.h>
-#include <labnation/smartscopeusb.h>
-#include <labnation/smartscope.h>
+#include <labnation/hardware/smartscopeusb.h>
+#include <labnation/scope/smartscope.h>
+#include <labnation/scope/serial.h>
+
+#include <utils.h>
+
+
 #ifdef HTTP
-#include <labnation/httpserver.h>
+#include <labnation/net/httpserver.h>
 #else
-#include <labnation/interfaceserver.h>
+#include <labnation/net/interfaceserver.h>
 #endif
 
 using namespace labnation;
@@ -27,6 +32,7 @@ HttpServer* server;
 InterfaceServer* server;
 #endif
 
+#define TEST_BASE36_ENC(input, length) info("Testing %d, results in %s", input, Base36::Encode(input, length).c_str());
 int main(int argc, char *argv[])
 {
   libusb_init(NULL);
@@ -36,12 +42,6 @@ int main(int argc, char *argv[])
   server->Start();
   delete(server);
 #else
-#ifdef TEST
-  debug("TESTING...");
-  smartscope = new SmartScope(NULL);
-  delete(smartscope);
-#else
-  debug("Real deal...");
   while(true)
   {
     int n = libusb_get_device_list(NULL, &devices);
@@ -51,8 +51,11 @@ int main(int argc, char *argv[])
         for(std::vector<int>::const_iterator j = SmartScopeUsb::PIDs.begin();
             j != SmartScopeUsb::PIDs.end(); ++j) {
           if(desc.idProduct == *j) {
-
+            debug("Creating new smartscope");
             scope = new SmartScopeUsb(devices[i]);
+            smartscope = new SmartScope(scope);
+
+/*
             server = new InterfaceServer(scope);
             server->Start();
             while(server->GetState() != InterfaceServer::State::Destroyed) {
@@ -62,7 +65,12 @@ int main(int argc, char *argv[])
             }
             debug("Server destroyed - quitting");
             delete(server);
+*/
+            delete(smartscope);
+            debug("Smartscope destroyed");
             delete(scope);
+            debug("Interface destroyed");
+            return 0;
           }
         }
       }
@@ -70,7 +78,6 @@ int main(int argc, char *argv[])
     libusb_free_device_list(devices, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
-#endif
 #endif
   libusb_exit(NULL);
 }

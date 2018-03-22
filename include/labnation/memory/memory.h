@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include "register.h"
-#include "../smartscopeusb.h"
+#include "../hardware/smartscopeusb.h"
 
 namespace labnation {
 

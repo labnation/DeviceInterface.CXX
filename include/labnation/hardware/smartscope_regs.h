@@ -3,7 +3,7 @@
 
 #include <map>
 #include <vector>
-#include "memory/register.h"
+#include "../memory/register.h"
 
 namespace labnation {
 

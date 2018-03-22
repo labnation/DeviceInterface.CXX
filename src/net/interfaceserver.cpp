@@ -1,4 +1,4 @@
-#include <labnation/interfaceserver.h>
+#include <labnation/net/interfaceserver.h>
 #ifndef DNSSD
 #include <avahi-common/error.h>
 #endif

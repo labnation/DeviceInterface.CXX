@@ -1,5 +1,5 @@
 #include <labnation.h>
-#include <labnation/smartscope.h>
+#include <labnation/scope/smartscope.h>
 #include <utils.h>
 #include <iostream>
 #include <fstream>

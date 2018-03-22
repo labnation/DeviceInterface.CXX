@@ -1,5 +1,5 @@
 #include <labnation.h>
-#include <labnation/httpserver.h>
+#include <labnation/net/httpserver.h>
 
 namespace labnation {
   HttpServer::HttpServer() {

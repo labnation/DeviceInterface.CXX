@@ -1,8 +1,8 @@
 #ifndef _LABNATION_INTERFACESERVER_H
 #define _LABNATION_INTERFACESERVER_H
 
-#include "smartscope_regs.h"
-#include "smartscopeusb.h"
+#include "../hardware/smartscope_regs.h"
+#include "../hardware/smartscopeusb.h"
 #include "server.h"
 
 #ifdef DNSSD

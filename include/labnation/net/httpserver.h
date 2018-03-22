@@ -1,7 +1,7 @@
 #ifndef _LABNATION_HTTPSERVER_H
 #define _LABNATION_HTTPSERVER_H
 
-#include "smartscopeusb.h"
+#include "../hardware/smartscopeusb.h"
 #include "server.h"
 
 #include <mongoose.h>

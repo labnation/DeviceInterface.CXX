@@ -1,7 +1,7 @@
 #include <thread>
 #include <chrono>
 #include <labnation.h>
-#include <labnation/smartscopeusb.h>
+#include <labnation/hardware/smartscopeusb.h>
 #include <stdarg.h>
 
 namespace labnation {

@@ -1,5 +1,5 @@
 #include <labnation.h>
-#include <labnation/serial.h>
+#include <labnation/scope/serial.h>
 #include <utils.h>
 #include <time.h>
 #include <string>

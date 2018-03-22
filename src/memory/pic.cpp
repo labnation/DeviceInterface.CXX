@@ -1,6 +1,6 @@
 #include <labnation.h>
-#include <labnation/smartscopeusb.h>
-#include <labnation/smartscope_regs.h>
+#include <labnation/hardware/smartscopeusb.h>
+#include <labnation/hardware/smartscope_regs.h>
 #include <labnation/memory/memory.h>
 
 namespace labnation {

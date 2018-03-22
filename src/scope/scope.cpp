@@ -1,6 +1,6 @@
 #include <labnation.h>
-#include <labnation/channel.h>
-#include <labnation/scope.h>
+#include <labnation/scope/channel.h>
+#include <labnation/scope/scope.h>
 
 namespace labnation {
 
