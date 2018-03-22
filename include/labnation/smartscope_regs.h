@@ -92,6 +92,17 @@ const int FETCH_SIZE_MAX = 2048 * 2;
   X(SPI_RECEIVED_VALUE, 4) \
   X(STROBES, 5)
 
+#define LIST_ADC \
+  X(POWER_MANAGEMENT, 0) \
+  X(OUTPUT_FORMAT, 1) \
+  X(OUTPUT_PWR_MNGMNT, 2) \
+  X(DATA_CLK_TIMING, 3) \
+  X(CHA_TERMINATION, 4) \
+  X(CHB_TERMINATION, 5) \
+  X(FORMAT_PATTERN, 6) \
+  X(COMMON_MODE, 8) \
+  X(SOFT_RESET, 10)
+
 #define X(name, value) REG_##name = value,
 enum REG { LIST_REG };
 #undef X
@@ -101,7 +112,9 @@ enum STR { LIST_STR };
 #define X(name, value) ROM_##name = value,
 enum ROM { LIST_ROM };
 #undef X
-
+#define X(name, value) ADC_##name = value,
+enum ADC { LIST_ADC };
+#undef X
 
 static std::map<REG, int> HDR_REGS
 {

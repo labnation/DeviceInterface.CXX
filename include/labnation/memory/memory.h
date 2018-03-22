@@ -89,6 +89,18 @@ private:
   FpgaRom* _read_memory;
 };
 
+class Adc : public Memory {
+public:
+  Adc(FpgaSettings* fpga_settings, FpgaStrobes* fpga_strobes, FpgaRom* fpga_rom);
+  void Write(uint32_t address);
+  void Read(uint32_t address);
+
+private:
+  FpgaSettings* _fpga_settings;
+  FpgaStrobes* _fpga_strobes;
+  FpgaRom* _fpga_rom;
+};
+
 }
 
 #endif // _LABNATION_MEMORY_H
