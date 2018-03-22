@@ -6,6 +6,7 @@
 #include "memory/register.h"
 #include "smartscopeusb.h"
 #include "scope.h"
+#include "serial.h"
 #include <cmath>
 #include <vector>
 
@@ -33,7 +34,7 @@ public:
   public Memories.MAX19506Memory AdcMemory { get; private set; }
   public Memories.ScopePicRegisterMemory PicMemory { get; private set; }
 */
-  std::string GetSerial();
+  Serial* serial;
   SmartScope(SmartScopeUsb* interface);
   ~SmartScope();
   void Pause();
@@ -73,6 +74,7 @@ private:
   bool _flashed = false;
   bool _deviceReady = false;
   bool _discardPreviousAcquisition = true;
+  void FlashFpga();
 
   std::vector<uint8_t> adcTimingValues = { 0, 1, 2, 3, 5, 6, 7 };
   uint8_t AdcTimingValue();
