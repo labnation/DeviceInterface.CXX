@@ -32,10 +32,17 @@ void Memory::Read(uint32_t address) {
 }
 
 bool Memory::Commit() {
-  std::map<uint, Register*>::iterator it =
-      std::find_if(registers.begin(), registers.end(),
-        [](const std::pair<uint, Register*> p) { return p.second->dirty; });
-  return false;
+  bool written = false;
+
+  for(auto& x: registers) {
+    if(!x.second->dirty)
+      continue;
+    written = true;
+    debug("comitting %s", x.second->name.c_str());
+    x.second->Write();
+  }
+
+  return written;
 }
 
 }
