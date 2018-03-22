@@ -36,6 +36,7 @@ uint32_t Register::Get() {
 
 void Register::Set(uint32_t value) {
   _value = value;
+  dirty = true;
 }
 
 }
