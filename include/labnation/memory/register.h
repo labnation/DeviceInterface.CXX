@@ -10,7 +10,7 @@ namespace labnation {
 class Register {
 
 public:
-  const char * name;
+  std::string name;
   uint32_t address;
 
   Register(void* memory, uint32_t address, const char * name);

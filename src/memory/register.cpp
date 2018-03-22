@@ -13,7 +13,7 @@ Register::Register(void* m, uint32_t address, const char* name)
 }
 
 void Register::Write() {
-  debug("Writing register %s [0x%02X] (%d)", name, address, dirty);
+  debug("Writing register %s [0x%02X] (%d)", name.c_str(), address, dirty);
   //static_cast<Memory*>(memory)->write(address);
   memory->Write(address);
 }
@@ -24,7 +24,7 @@ void Register::Write(uint32_t value) {
 }
 
 Register* Register::Read() {
-  debug("Reading register %s [0x%02X] (%d)", name, address, dirty);
+  debug("Reading register %s [0x%02X] (%d)", name.c_str(), address, dirty);
   //static_cast<Memory*>(memory)->read(address);
   memory->Read(address);
   return this;

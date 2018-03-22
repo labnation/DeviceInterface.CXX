@@ -3,12 +3,12 @@
 
 namespace labnation {
 
-Memory::Memory(const char* name) : name(name) {}
+Memory::Memory(const char* name) : name(name) {
+  debug("Initialising memory %s", name);
+}
 
 Memory::~Memory() {
-  debug("Destroying memory %s", name);
   for(auto r : registers) {
-    debug("Destroying register %s", r.second->name);
     delete(r.second);
   }
 }

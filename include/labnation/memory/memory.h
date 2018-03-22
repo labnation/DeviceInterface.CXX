@@ -15,7 +15,7 @@ public:
 
   Memory(const char* name);
   virtual ~Memory();
-  const char* name;
+  std::string name;
   std::map<uint32_t, Register*> registers;
 
   /*!
