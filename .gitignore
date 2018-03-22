@@ -2,3 +2,5 @@
 /server
 /smartscopeserver
 *.creator.user
+/DevIntC.files
+/DevIntC.includes
