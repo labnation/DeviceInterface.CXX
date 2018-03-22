@@ -80,6 +80,7 @@ public:
 };
 
 class FpgaStrobes : public Memory {
+public:
   FpgaStrobes(FpgaSettings* write_memory, FpgaRom* read_memory);
   void Write(uint32_t address);
   void Read(uint32_t address);
