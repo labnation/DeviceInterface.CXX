@@ -4,6 +4,7 @@
 #include <sys/select.h>
 #include <math.h>
 #include <utils.h>
+#include <labnation.h>
 
 #define PTHREAD_JOIN_POLL_INTERVAL 10
 #define false 0
@@ -86,6 +87,26 @@ long Base36::Decode(std::string s) {
 
   return result;
 
+}
+
+std::string Base36::Encode(long input, int length)
+{
+  std::string result = std::string(length, charlist[0]);
+
+  if (input < 0)
+    throw Exception("Input cannot be negative (got %lu)", input);
+
+
+
+  for(int pos = length - 1; pos >= 0; pos--) {
+      result[pos] = charlist[input % 36];
+      input /= 36;
+  }
+
+  if(input)
+    throw Exception("Input %lu too large for length %d", input, length);
+
+  return result;
 }
 
 }

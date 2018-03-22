@@ -13,6 +13,7 @@ namespace labnation {
 class Base36 {
 public:
   static long Decode(std::string s);
+  static std::string Encode(long input, int length);
 
 private:
   static std::string charlist;
