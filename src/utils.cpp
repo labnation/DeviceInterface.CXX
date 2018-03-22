@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <sys/select.h>
-
+#include <math.h>
 #include <utils.h>
 
 #define PTHREAD_JOIN_POLL_INTERVAL 10
@@ -69,4 +69,23 @@ int pthread_join_timeout(pthread_t wid, unsigned int msecs)
   /* free helper thread resources */
   pthread_join(id, NULL);
   return (timedOut);
+}
+
+namespace labnation {
+
+std::string Base36::charlist = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+long Base36::Decode(std::string s) {
+  long result = 0;
+  int pos = 0;
+
+  for (std::string::reverse_iterator rit=s.rbegin(); rit!=s.rend(); ++rit) {
+    result += charlist.find(tolower(*rit)) * (int)pow(36, pos);
+    pos++;
+  }
+
+  return result;
+
+}
+
 }
