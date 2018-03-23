@@ -9,7 +9,7 @@
 
 #ifdef DEBUG
 #define debug(fmt, ...) \
-            do { std::fprintf(stdout, "[DBG ] " fmt "\n", ##__VA_ARGS__); } while (0)
+            do { std::fprintf(stdout, "[DBG][" __FILE__":%d] " fmt "\n", __LINE__, ##__VA_ARGS__); } while (0)
 #else
 #define debug(fmt, ...)
 #endif
