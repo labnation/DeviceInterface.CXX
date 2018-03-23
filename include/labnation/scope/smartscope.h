@@ -7,6 +7,7 @@
 #include "channel.h"
 #include "scope.h"
 #include "serial.h"
+#include "calibration.h"
 #include <cmath>
 #include <vector>
 
@@ -19,6 +20,7 @@ public:
   bool SuspendViewportUpdates;
   std::vector<Memory*> memories;
 
+  Calibration* calibration;
   FpgaSettings* fpga_settings;
   FpgaRom* fpga_rom;
   FpgaStrobes* fpga_strobes;
@@ -129,8 +131,6 @@ private:
   float YOffset(AnalogChannel* channel);
   float ConvertYOffsetByteToVoltage(AnalogChannel* channel, uint8_t value);
 
-  static const double constexpr validDividers[] = { 1, 6, 36 };
-  static const double constexpr validMultipliers[] = { 1.1, 2, 3 };
   std::map<AnalogChannel*, float[2]> verticalRanges;
   void VerticalRange(AnalogChannel* channel, float minimum, float maximum);
   void SetDivider(AnalogChannel* channel, double divider);
