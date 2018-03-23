@@ -103,7 +103,7 @@ private:
   bool _acquiringWhenPaused = false;
   int32_t _acquisitionDepthUserMaximum = ACQUISITION_DEPTH_DEFAULT;
 
-  //std::map<AnalogChannel, GainCalibration> channelSettings;
+  std::map<AnalogChannel*, double*> channelSettings;
   /*
   private TriggerValue triggerValue = new TriggerValue
   {
@@ -138,6 +138,20 @@ private:
 
   void Coupling(AnalogChannel* channel, labnation::Coupling coupling);
   enum Coupling Coupling(AnalogChannel* channel);
+
+  /**
+   * @brief Get probe scaler of channel
+   * @param channel
+   * @return
+   */
+  float Scaler(AnalogChannel* channel);
+  /**
+   * @brief Set Prober scaler of channel
+   * @param channel
+   * @param scaler factor by which the probe scales the measured voltage
+   */
+  void Scaler(AnalogChannel* channel, float scaler);
+  std::map<AnalogChannel*, float> _scalers;
 
   /*
    * Acquisition & Viewport
@@ -180,9 +194,11 @@ private:
   void ViewPortOffset(double time, int samplesExcess);
   double ViewPortTimeSpan();
   double ViewPortOffset();
-  int SubSampleRate();
-  void SubSampleRate(int rate);
+  static int ComputeViewportSamplesExcess(double acquisitionTimeSpan, double samplePeriod, double viewportOffset, int viewportSamples, int viewportDecimation);
+  uint32_t SubSampleRate();
+  void SubSampleRate(uint32_t rate);
   double SamplePeriod();
+  double SamplePeriodCurrent();
   double SamplesToTime(uint samples);
 
   bool LogicAnalyserEnabled();
@@ -194,11 +210,12 @@ private:
   /*
    * Trigger
    */
-  double _holdoff;
+
   labnation::TriggerValue TriggerValue();
   void Trigger(labnation::TriggerValue);
   void ForceTrigger();
   static int TriggerDelay(TriggerMode mode, int inputDecimation);
+  double _holdoff;
   double TriggerHoldOff();
   void TriggerHoldOff(double holdoff);
   void SetTriggerByte(uint8_t level);
