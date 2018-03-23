@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <set>
 #include "register.h"
 #include "../hardware/smartscopeusb.h"
 
@@ -37,9 +38,9 @@ public:
 
   /*!
    * \brief Writes all dirty registers
-   * \return True if at least 1 register was written
+   * \return List of addresses that were written
    */
-  virtual bool Commit();
+  virtual std::set<uint32_t> Commit();
 
   virtual Register* operator[](uint32_t address);
 
