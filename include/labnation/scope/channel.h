@@ -3,7 +3,8 @@
 
 #include <typeinfo>
 #include <string>
-#include <vector>
+#include <set>
+#include <labnation.h>
 
 namespace labnation {
 
@@ -13,7 +14,9 @@ class Channel {
     std::string name;
     uint32_t value;
     const std::type_info* datatype;
-    static std::vector<Channel*> list;
+    static std::set<Channel*> list;
+
+    Channel() {}
 
     Channel(std::string name, uint32_t value, const std::type_info * datatype)
     {
@@ -21,17 +24,19 @@ class Channel {
       this->value = value;
       this->datatype =  datatype;
 
-      list.push_back(this);
+      list.insert(this);
     }
 
 };
 
 class AnalogChannel: public Channel {
   public:
-    static std::vector<AnalogChannel*> list;
+    static std::set<AnalogChannel*> list;
 
+    AnalogChannel() {}
     AnalogChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(float)) {
-      list.push_back(this);
+      list.insert(this);
+      debug("Adding analogchannel %s @%p to list ", name.c_str(), this);
     }
 
 };
@@ -39,26 +44,28 @@ class AnalogChannel: public Channel {
 class DigitalChannel: public Channel {
 
   public:
-    static std::vector<DigitalChannel*> list;
+    static std::set<DigitalChannel*> list;
 
+    DigitalChannel() {}
     DigitalChannel(std::string name, uint32_t value) : Channel(name, value, &typeid(bool)) {
-      DigitalChannel::list.push_back(this);
+      DigitalChannel::list.insert(this);
     }
 
 };
 
-namespace channels {
-  static AnalogChannel ChA = AnalogChannel("A", 0);
-  static AnalogChannel ChB = AnalogChannel("B", 1);
-  static DigitalChannel Digi0 = DigitalChannel("0", 0);
-  static DigitalChannel Digi1 = DigitalChannel("1", 1);
-  static DigitalChannel Digi2 = DigitalChannel("2", 2);
-  static DigitalChannel Digi3 = DigitalChannel("3", 3);
-  static DigitalChannel Digi4 = DigitalChannel("4", 4);
-  static DigitalChannel Digi5 = DigitalChannel("5", 5);
-  static DigitalChannel Digi6 = DigitalChannel("6", 6);
-  static DigitalChannel Digi7 = DigitalChannel("7", 7);
-}
+class Channels {
+public:
+  static AnalogChannel ChA;
+  static AnalogChannel ChB;
+  static DigitalChannel Digi0;
+  static DigitalChannel Digi1;
+  static DigitalChannel Digi2;
+  static DigitalChannel Digi3;
+  static DigitalChannel Digi4;
+  static DigitalChannel Digi5;
+  static DigitalChannel Digi6;
+  static DigitalChannel Digi7;
+};
 
 }
 #endif // _LABNATION_CHANNEL_H

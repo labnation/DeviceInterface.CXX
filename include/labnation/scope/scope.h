@@ -22,7 +22,7 @@ public:
 
   TriggerMode mode = Edge;
   TriggerSource source = Channel;
-  AnalogChannel channel = channels::ChA;
+  AnalogChannel channel = Channels::ChA;
   std::map<DigitalChannel*, DigitalTriggerValue> digital;
   TriggerEdge edge = RISING;
   float level;
