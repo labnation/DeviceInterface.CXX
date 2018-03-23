@@ -22,6 +22,7 @@ SRCS := \
         scope/channel.cpp \
         scope/scope.cpp \
         scope/serial.cpp \
+        scope/calibration.cpp \
         utils.cpp
 
 OBJS := $(SRCS:.cpp=.cpp.o)
