@@ -31,18 +31,18 @@ void Memory::Read(uint32_t address) {
   throw Exception("Read not implemented for generic memory");
 }
 
-bool Memory::Commit() {
-  bool written = false;
+std::set<uint32_t> Memory::Commit() {
+  std::set<uint32_t> written_registers;
 
   for(auto& x: registers) {
     if(!x.second->dirty)
       continue;
-    written = true;
     debug("comitting %s", x.second->name.c_str());
     x.second->Write();
+    written_registers.insert(x.second->address);
   }
 
-  return written;
+  return written_registers;
 }
 
 }
