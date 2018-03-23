@@ -15,8 +15,10 @@ const int ACQUISITION_DEPTH_MIN = 128; //Size of RAM
 const int ACQUISITION_DEPTH_MAX = 4 * 1024 * 1024; //Size of RAM
 const int FETCH_SIZE_MAX = 2048 * 2;
 
-static double VALID_DIVIDERS[3] = { 1, 6, 36 };
-static double VALID_MULTIPLIERS[3] = { 1.1, 2, 3 };
+static const int N_DIV = 3;
+static double VALID_DIVIDERS[N_DIV] = { 1, 6, 36 };
+static const int N_MUL = 3;
+static double VALID_MULTIPLIERS[N_MUL] = { 1.1, 2, 3 };
 
 #define LIST_PIC \
   X(FORCE_STREAMING, 0)
