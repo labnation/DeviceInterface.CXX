@@ -35,6 +35,7 @@ uint32_t Register::Get() {
 }
 
 void Register::Set(uint32_t value) {
+  debug("Setting reg %s to 0x%02X", name.c_str(), value);
   _value = value;
   dirty = true;
 }
