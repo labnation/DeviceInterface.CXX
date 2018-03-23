@@ -2,7 +2,7 @@
 #define _LABNATION_SMARTSCOPE_REGS_H
 
 #include <map>
-#include <vector>
+#include <set>
 #include "../memory/register.h"
 
 namespace labnation {
@@ -164,7 +164,7 @@ const int N_HDR_STROBES = 5;
 
 
 
-static std::vector<STR> AcquisitionStrobes =
+static std::set<STR> AcquisitionStrobes =
 {
   STR_LA_ENABLE,
   STR_CHA_DCCOUPLING,
@@ -174,7 +174,7 @@ static std::vector<STR> AcquisitionStrobes =
 };
 
 
-static std::vector<REG> AcquisitionRegisters =
+static std::set<REG> AcquisitionRegisters =
 {
   REG_TRIGGER_LEVEL,
   REG_TRIGGER_MODE,
@@ -201,7 +201,7 @@ static std::vector<REG> AcquisitionRegisters =
 };
 
 
-static std::vector<REG> ViewRegisters =
+static std::set<REG> ViewRegisters =
 {
   REG_VIEW_DECIMATION,
   REG_VIEW_OFFSET_B0,
