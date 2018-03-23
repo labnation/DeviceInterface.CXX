@@ -49,6 +49,7 @@ class DigitalChannel: public Channel {
 
 namespace channels {
   static AnalogChannel ChA = AnalogChannel("A", 0);
+  static AnalogChannel ChB = AnalogChannel("B", 1);
   static DigitalChannel Digi0 = DigitalChannel("0", 0);
   static DigitalChannel Digi1 = DigitalChannel("1", 1);
   static DigitalChannel Digi2 = DigitalChannel("2", 2);
