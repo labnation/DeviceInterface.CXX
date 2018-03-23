@@ -29,19 +29,18 @@ FpgaMemory::FpgaMemory(SmartScopeUsb *interface, uint8_t i2c_address, const char
 
 void FpgaMemory::Read(uint32_t address)
 {
-    uint8_t data[1];
-    _interface->GetControllerRegister(SmartScopeUsb::FPGA, CONVERT(address), sizeof(data), data);
-    registers[address]->Set(data[0]);
-    registers[address]->dirty = false;
+  uint8_t data[1];
+  _interface->GetControllerRegister(SmartScopeUsb::FPGA, CONVERT(address), sizeof(data), data);
+  registers[address]->Set(data[0]);
+  registers[address]->dirty = false;
 }
 
 void FpgaMemory::Write(uint32_t address)
 {
-    if (_read_only) return;
-
-    uint8_t data[1] = { (uint8_t)registers[address]->Get() };
-    _interface->SetControllerRegister(SmartScopeUsb::FPGA, CONVERT(address), sizeof(data), data);
-    registers[address]->dirty = false;
+  if (_read_only) return;
+  uint8_t data[1] = { (uint8_t)registers[address]->Get() };
+  _interface->SetControllerRegister(SmartScopeUsb::FPGA, CONVERT(address), sizeof(data), data);
+  registers[address]->dirty = false;
 }
 
 /*
@@ -89,7 +88,7 @@ FpgaStrobes::FpgaStrobes(FpgaSettings *write_memory, FpgaRom *read_memory)
 }
 
 void FpgaStrobes::Write(uint32_t address) {
-  _write_memory[REG_STROBE_UPDATE].Write((address << 1) + (registers[address]->Get() ? 1 : 0));
+  (*_write_memory)[REG_STROBE_UPDATE]->Write((address << 1) + (registers[address]->Get() ? 1 : 0));
   registers[address]->dirty = false;
 }
 
@@ -116,19 +115,18 @@ Adc::Adc(FpgaSettings *fpga_settings, FpgaStrobes *fpga_strobes, FpgaRom *fpga_r
   #undef X
 }
 
-void Adc::Read(uint32_t address) {
+void Adc::Read(uint32_t address) {  
+  (*_fpga_settings)[REG_SPI_ADDRESS]->Write(address + 0x80); //for a read, MSB must be 1
 
-    (*_fpga_settings)[REG_SPI_ADDRESS]->Write(address + 0x80); //for a read, MSB must be 1
+  //next, trigger rising edge to initiate SPI comm
+  (*_fpga_strobes)[STR_INIT_SPI_TRANSFER]->Write(0);
+  (*_fpga_strobes)[STR_INIT_SPI_TRANSFER]->Write(1);
 
-    //next, trigger rising edge to initiate SPI comm
-    (*_fpga_strobes)[STR_INIT_SPI_TRANSFER]->Write(0);
-    (*_fpga_strobes)[STR_INIT_SPI_TRANSFER]->Write(1);
+  //finally read acquired value
+  uint32_t acquiredVal = (*_fpga_rom)[ROM_SPI_RECEIVED_VALUE]->Read()->Get();
 
-    //finally read acquired value
-    uint32_t acquiredVal = (*_fpga_rom)[ROM_SPI_RECEIVED_VALUE]->Read()->Get();
-
-    registers[address]->Set(acquiredVal);
-    registers[address]->dirty = false;
+  registers[address]->Set(acquiredVal);
+  registers[address]->dirty = false;
 }
 
 void Adc::Write(uint32_t address) {

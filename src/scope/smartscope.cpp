@@ -1,5 +1,6 @@
 #include <labnation.h>
 #include <labnation/scope/smartscope.h>
+
 #include <utils.h>
 #include <iostream>
 #include <fstream>
@@ -14,6 +15,8 @@ SmartScope::SmartScope(SmartScopeUsb* interface)
   _hardware_interface = interface;
   for(auto ch : AnalogChannel::list)
     YOffset(ch, 0);
+
+  calibration = new Calibration(_hardware_interface);
 
   pic = new PicMemory(_hardware_interface);
   memories.push_back(pic);
@@ -92,9 +95,6 @@ void SmartScope::Configure() {
 
   //Reconfigure ADC with new timing value
   ConfigureAdc();
-
-  for(auto r : fpga_settings->registers)
-    debug("FPGA reg %s @ 0x%02X = 0x%02X", r.second->name.c_str(), r.second->address, r.second->Read()->Get());
 }
 
 void SmartScope::EnableEssentials(bool enable) {
@@ -153,6 +153,7 @@ void SmartScope::CommitSettings() {
       if(AcquisitionStrobes.find((STR)strobe) != AcquisitionStrobes.end()) {
         acquisitionUpdateRequired = true;
         debug("Acqusition update required because of strobe %s", (*fpga_strobes)[strobe]->name.c_str());
+        break;
       }
     }
 
@@ -249,14 +250,8 @@ Coupling SmartScope::Coupling(AnalogChannel *channel) {
 void SmartScope::Coupling(AnalogChannel* ch, labnation::Coupling coupling)
 {
   uint32_t strobe = STR_CHA_DCCOUPLING;
-  debug("Channel in = %p", ch);
-  debug("Channel A  = %p", &Channels::ChA);
-  debug("Channel B  = %p", &Channels::ChB);
-  //debug("A == ch? %d", );
-  //debug("B == ch? %d", *ch == channels::ChB);
-  //if(ch == &channels::ChB)
-  //if(*ch == channels::ChA)
-//    strobe = STR_CHB_DCCOUPLING;
+  if(ch == &Channels::ChB)
+    strobe = STR_CHB_DCCOUPLING;
 
   debug("Set DC coupling for channel %s to %d", ch->name.c_str(), coupling == DC);
   (*fpga_strobes)[strobe]->Set(coupling == DC);

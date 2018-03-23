@@ -37,7 +37,6 @@ std::set<uint32_t> Memory::Commit() {
   for(auto& x: registers) {
     if(!x.second->dirty)
       continue;
-    debug("comitting %s", x.second->name.c_str());
     x.second->Write();
     written_registers.insert(x.second->address);
   }
