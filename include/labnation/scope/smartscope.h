@@ -57,7 +57,7 @@ private:
 
   static const int32_t  OVERVIEW_BUFFER_SIZE = 2048;
   static const int32_t  ACQUISITION_DEPTH_DEFAULT = 512 * 1024;
-  const int VIEW_DECIMATION_MAX = (int)std::log2((double)ACQUISITION_DEPTH_DEFAULT / (double)OVERVIEW_BUFFER_SIZE);
+  int VIEW_DECIMATION_MAX = (int)std::log2((double)ACQUISITION_DEPTH_DEFAULT / (double)OVERVIEW_BUFFER_SIZE);
 
   constexpr static const double   BASE_SAMPLE_PERIOD = 10e-9; //10MHz sample rate
   static const int32_t  MAX_COMPLETION_TRIES = 1;
@@ -71,7 +71,6 @@ private:
    */
   SmartScopeUsb* _hardware_interface;
   //SmartScopeRom* _rom;
-  bool _flashed = false;
   bool _deviceReady = false;
   bool _discardPreviousAcquisition = true;
   void FlashFpga();
@@ -116,8 +115,8 @@ private:
   static const uint32_t FPGA_VERSION_UNFLASHED = 0xffffffff;
 
   void CommitSettings();
-  void toggleAcquisitionUpdateStrobe();
-  void toggleViewUpdateStrobe();
+  void ToggleAcquisitionUpdateStrobe();
+  void ToggleViewUpdateStrobe();
 
   /*
    * Vertical
@@ -137,7 +136,7 @@ private:
   void SetDivider(AnalogChannel* channel, double divider);
   void SetMultiplier(AnalogChannel* channel, double multiplier);
 
-  void Coupling(AnalogChannel* channel, enum Coupling coupling);
+  void Coupling(AnalogChannel* channel, labnation::Coupling coupling);
   enum Coupling Coupling(AnalogChannel* channel);
 
   /*
@@ -170,6 +169,9 @@ private:
   void PreferPartial(bool pref);
   void AcquisitionLength(double length);
   double AcquisitionLength();
+
+  uint32_t AcquisitionDepthUserMaximum();
+  void AcquisitionDepthUserMaximum(uint32_t value);
 
   uint32_t AcquisitionDepth();
   void AcquisitionDepth(uint32_t depth);
