@@ -4,7 +4,10 @@ OUT_DIR := build
 SRC_DIR := src
 LIB_DIR := $(PREFIX)/lib
 LIB_DIR_PARAM :=$(foreach d, $(LIB_DIR), -L$d)
-INCLUDE_DIR := include $(PREFIX)/include
+INCLUDE_DIR := include
+ifndef CFLAGS
+INCLUDE_DIR += $(PREFIX)/include
+endif
 INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
@@ -20,21 +23,21 @@ DEPS := $(OBJS:.o=.d)
 CC = $(CROSS_COMPILE)c++
 LD = $(CROSS_COMPILE)ld
 
-CCFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
+CFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
 LIBS := -lusb-1.0 -lpthread -lstdc++
-LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
-
 
 ifdef DNSSD
-CCFLAGS += -DDNSSD
+CFLAGS += -DDNSSD
 else
 LIBS += -lavahi-client -lavahi-common -ldbus-1
 endif
 
+LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
+
 ifdef DEBUG
-CCFLAGS += -DDEBUG
+CFLAGS += -DDEBUG
 else
-CCFLAGS += -O3
+CFLAGS += -O3
 endif
 
 .PHONY: all clean clear install
@@ -57,4 +60,4 @@ smartscopeserver: $(OBJS)
 $(OUT_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	@printf "  CC      %s\n" $@
 	@mkdir -p $(@D)
-	$(CC) $(CCFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
