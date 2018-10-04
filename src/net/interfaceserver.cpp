@@ -253,7 +253,7 @@ void InterfaceServer::ControlSocketServer() {
           case SERIAL:
             serial = _scope->GetSerial();
             if(serial.length() == 0)
-                serial = std::string("0254301KA16");
+                serial = std::string("UNKNOWN");
             response->length = 11;
             memcpy(response->data, serial.c_str(), response->length);
             break;
