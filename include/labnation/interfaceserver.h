@@ -35,17 +35,29 @@ public:
 class InterfaceServer {
 
 enum Command : uint8_t {
-  SERIAL = 13,
-  GET = 24,
-  SET = 25,
-  DATA = 26,
-  PIC_FW_VERSION = 27,
-  FLASH_FPGA = 36,
-  ACQUISITION = 52,
-  FLUSH = 14,
-  DATA_PORT = 42,
-  DISCONNECT = 15,
+  SERIAL          = 0x0d,
+  FLUSH           = 0x0e,
+  DISCONNECT      = 0x0f,
+  GET             = 0x18,
+  SET             = 0x19,
+  DATA            = 0x1a,
+  PIC_FW_VERSION  = 0x1b,
+  FLASH_FPGA      = 0x24,
+  DATA_PORT       = 0x2a,
+  ACQUISITION     = 0x34,
+#ifdef LEDE
+  LEDE_LIST_APS   = 0x40,
+  LEDE_RESET      = 0x41,
+  LEDE_CONNECT_AP = 0x42,
+  LEDE_REBOOT     = 0x43,
+#endif
 };
+
+#ifdef LEDE
+#define LEDE_CMD_LIST_APS   "/usr/sbin/iw dev wlan0 scan"
+#define LEDE_CMD_RESET      "yes | /sbin/firstboot"
+#define LEDE_CMD_REBOOT     "/sbin/reboot"
+#endif
 
 struct __attribute__ ((__packed__)) Message {
   uint32_t length;

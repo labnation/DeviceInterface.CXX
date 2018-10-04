@@ -189,6 +189,12 @@ void InterfaceServer::ControlSocketServer() {
   std::string serial;
   uint32_t version;
 
+#ifdef LEDE
+  char cmd[255];
+  char* cmd_var;
+  std::string cmd_output;
+#endif
+
   /* Start control server */
   if((_sock_ctrl_listen = InterfaceServer::StartServer("0")) == -1)
     throw NetException("Failed to control server socket");
@@ -302,6 +308,65 @@ void InterfaceServer::ControlSocketServer() {
             _scope->GetControllerRegister(ctrl_msg->ctrl, ctrl_msg->addr, ctrl_msg->len,
                                           ((ControllerMessage*)response->data)->data);
             break;
+#ifdef LEDE
+          case LEDE_RESET:
+            info("Factory resetting device");
+            cmd_output = execute_cmd(LEDE_CMD_RESET);
+            if (cmd_output.length() == 0)
+              cmd_output = std::string("Failed");
+
+            response->length = cmd_output.length();
+            memcpy(response->data, cmd_output.c_str(), response->length);
+
+            break;
+
+          case LEDE_REBOOT:
+            info("Rebooting device");
+            cmd_output = execute_cmd(LEDE_CMD_REBOOT);
+            response->length = 0;
+            break;
+
+          case LEDE_LIST_APS:
+            cmd_output = execute_cmd(LEDE_CMD_LIST_APS);
+            if (cmd_output.length() == 0)
+              cmd_output = std::string("Failed");
+
+            response->length = cmd_output.length();
+            memcpy(response->data, cmd_output.c_str(), response->length);
+            break;
+
+          case LEDE_CONNECT_AP:
+            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
+            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.device=radio0");
+            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
+
+            cmd_var=(char*)request->data;
+            sprintf(cmd, "/sbin/uci set wireless.default_radio0.ssid=\"%s\"", cmd_var);
+            cmd_output += execute_cmd(cmd);
+
+            cmd_var += strlen(cmd_var) + 1;
+            sprintf(cmd, "/sbin/uci set wireless.default_radio0.encryption=\"%s\"", cmd_var);
+            cmd_output += execute_cmd(cmd);
+
+            cmd_var += strlen(cmd_var) + 1;
+            sprintf(cmd, "/sbin/uci set wireless.default_radio0.bssid=\"%s\"", cmd_var);
+            cmd_output += execute_cmd(cmd);
+
+            cmd_var += strlen(cmd_var) + 1;
+            sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=\"%s\"", cmd_var);
+            cmd_output += execute_cmd(cmd);
+
+            cmd_output += execute_cmd("/sbin/uci commit wireless");
+            cmd_output += execute_cmd("/sbin/wifi");
+
+            if (cmd_output.length() == 0)
+              cmd_output = std::string("Failed");
+
+            response->length = cmd_output.length();
+            memcpy(response->data, cmd_output.c_str(), response->length);
+
+            break;
+#endif
           default:
             info("Unsupported command %d", request->cmd);
             Stop();
