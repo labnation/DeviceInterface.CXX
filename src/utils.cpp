@@ -3,7 +3,10 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+#include <labnation.h>
 #include <utils.h>
+#include <stdexcept>
+
 
 #define PTHREAD_JOIN_POLL_INTERVAL 10
 #define false 0
@@ -69,4 +72,24 @@ int pthread_join_timeout(pthread_t wid, unsigned int msecs)
   /* free helper thread resources */
   pthread_join(id, NULL);
   return (timedOut);
+}
+
+std::string execute_cmd(const char* cmd) {
+  debug("Executing command [%s]", cmd);
+  char buffer[128];
+  std::string result = "";
+  FILE* pipe = popen(cmd, "r");
+  if (!pipe) throw std::runtime_error("popen() failed!");
+  try {
+    while (!feof(pipe)) {
+      if (fgets(buffer, 128, pipe) != NULL)
+        result += buffer;
+    }
+  } catch (...) {
+    pclose(pipe);
+    throw;
+  }
+  pclose(pipe);
+  debug("Output: \n%s", result.c_str());
+  return result;
 }
