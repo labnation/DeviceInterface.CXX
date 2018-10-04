@@ -40,6 +40,11 @@ else
 CFLAGS += -O3
 endif
 
+ifdef LEDE
+CFLAGS += -DLEDE
+endif
+
+
 .PHONY: all clean clear install
 
 all: smartscopeserver
