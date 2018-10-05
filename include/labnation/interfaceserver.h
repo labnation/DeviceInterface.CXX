@@ -30,6 +30,14 @@
 #define VERSION_MINOR  2
 #define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
 
+#if LEDE
+#define FLAVOR "lede"
+#elif DNSSD
+#define FLAVOR "dnssd"
+#else
+#define FLAVOR "vanilla"
+#endif
+
 namespace labnation {
 
 class NetException: public std::exception {
