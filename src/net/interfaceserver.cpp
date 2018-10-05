@@ -250,6 +250,11 @@ void InterfaceServer::ControlSocketServer() {
           response->cmd = request->cmd;
 
           switch (request->cmd) {
+          case SERVER_VERSION:
+            version = VERSION;
+            response->length = sizeof(version);
+            memcpy(response->data, &version, response->length);
+            break;
           case SERIAL:
             serial = _scope->GetSerial();
             if(serial.length() == 0)

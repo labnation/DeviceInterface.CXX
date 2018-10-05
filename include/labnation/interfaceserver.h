@@ -20,6 +20,16 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#ifdef LEDE
+#define LEDE_CMD_LIST_APS   "/usr/sbin/iw dev wlan0 scan"
+#define LEDE_CMD_RESET      "yes | /sbin/firstboot"
+#define LEDE_CMD_REBOOT     "/sbin/reboot"
+#endif
+
+#define VERSION_MAJOR  1
+#define VERSION_MINOR  2
+#define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
+
 namespace labnation {
 
 class NetException: public std::exception {
@@ -51,13 +61,8 @@ enum Command : uint8_t {
   LEDE_CONNECT_AP = 0x42,
   LEDE_REBOOT     = 0x43,
 #endif
+  SERVER_VERSION  = 0x50,
 };
-
-#ifdef LEDE
-#define LEDE_CMD_LIST_APS   "/usr/sbin/iw dev wlan0 scan"
-#define LEDE_CMD_RESET      "yes | /sbin/firstboot"
-#define LEDE_CMD_REBOOT     "/sbin/reboot"
-#endif
 
 struct __attribute__ ((__packed__)) Message {
   uint32_t length;
