@@ -30,12 +30,18 @@
 #define VERSION_MINOR  2
 #define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
 
-#if LEDE
-#define FLAVOR "lede"
-#elif DNSSD
-#define FLAVOR "dnssd"
+#if DEBUG
+#define FLAVOR_DEBUG "-debug"
 #else
-#define FLAVOR "vanilla"
+#define FLAVOR_DEBUG ""
+#endif
+
+#if LEDE
+#define FLAVOR "lede" FLAVOR_DEBUG
+#elif DNSSD
+#define FLAVOR "dnssd" FLAVOR_DEBUG
+#else
+#define FLAVOR "vanilla" FLAVOR_DEBUG
 #endif
 
 namespace labnation {
