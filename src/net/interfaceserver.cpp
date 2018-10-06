@@ -368,8 +368,9 @@ void InterfaceServer::ControlSocketServer() {
 
             response->length = cmd_output.length();
             memcpy(response->data, cmd_output.c_str(), response->length);
+            Stop();
+            return;
 
-            break;
 #endif
           default:
             info("Unsupported command %d", request->cmd);
