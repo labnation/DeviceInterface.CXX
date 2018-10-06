@@ -342,7 +342,6 @@ void InterfaceServer::ControlSocketServer() {
 
           case LEDE_CONNECT_AP:
             cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
-            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.device=radio0");
             cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
 
             cmd_var=(char*)request->data;
