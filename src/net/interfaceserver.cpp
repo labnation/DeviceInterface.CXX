@@ -193,6 +193,7 @@ void InterfaceServer::ControlSocketServer() {
   char cmd[255];
   char* cmd_var;
   std::string cmd_output;
+  bool wep=false;
 #endif
 
   /* Start control server */
@@ -341,35 +342,40 @@ void InterfaceServer::ControlSocketServer() {
             break;
 
           case LEDE_CONNECT_AP:
-            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
-            cmd_output += execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
+            execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
+            execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
 
             cmd_var=(char*)request->data;
             sprintf(cmd, "/sbin/uci set wireless.default_radio0.ssid=\"%s\"", cmd_var);
-            cmd_output += execute_cmd(cmd);
+            execute_cmd(cmd);
 
             cmd_var += strlen(cmd_var) + 1;
+            wep = strcmp("wep", cmd_var) ? false : true;
             sprintf(cmd, "/sbin/uci set wireless.default_radio0.encryption=\"%s\"", cmd_var);
-            cmd_output += execute_cmd(cmd);
+            execute_cmd(cmd);
 
             cmd_var += strlen(cmd_var) + 1;
             sprintf(cmd, "/sbin/uci set wireless.default_radio0.bssid=\"%s\"", cmd_var);
-            cmd_output += execute_cmd(cmd);
+            execute_cmd(cmd);
 
             cmd_var += strlen(cmd_var) + 1;
-            sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=\"%s\"", cmd_var);
-            cmd_output += execute_cmd(cmd);
+            debug("Using wep? %d", wep);
+            if(wep) {
+              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=1");
+              execute_cmd(cmd);
+              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key1=\"%s\"", cmd_var);
+              execute_cmd(cmd);
+            } else {
+              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=\"%s\"", cmd_var);
+              execute_cmd(cmd);
+            }
 
-            cmd_output += execute_cmd("/sbin/uci commit wireless");
-            cmd_output += execute_cmd("/sbin/wifi");
+            execute_cmd("/sbin/uci commit wireless");
+            execute_cmd("/sbin/wifi");
 
-            if (cmd_output.length() == 0)
-              cmd_output = std::string("Failed");
-
-            response->length = cmd_output.length();
-            memcpy(response->data, cmd_output.c_str(), response->length);
+            info("Stopping server so it can restart");
             Stop();
-            return;
+            info("... Stopped");
 
 #endif
           default:
