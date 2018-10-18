@@ -2,6 +2,8 @@
 #include <thread>
 #include <chrono>
 #include <cstring>
+#include <signal.h>
+
 #include <libusb-1.0/libusb.h>
 #include <labnation.h>
 #include <labnation/smartscopeusb.h>
@@ -18,8 +20,18 @@ InterfaceServer* server;
 const uint8_t FPGA_I2C_ADDRESS_SETTINGS = 0x0C;
 const uint8_t FPGA_I2C_ADDRESS_ROM = 0x0D;
 
+void handle_sighup(int sig)
+{
+  if(server) {
+    debug("SIGHUP - Stopping server");
+    server->Stop();
+  }
+}
+
 int main(int argc, char *argv[])
 {
+  signal(SIGHUP, handle_sighup);
+
   libusb_init(NULL);
   //libusb_set_debug(usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   info("Starting smartscope server v%d.%d-%s", VERSION_MAJOR, VERSION_MINOR, FLAVOR);
@@ -52,4 +64,5 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   libusb_exit(NULL);
+  info("Server quiting");
 }
