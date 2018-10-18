@@ -375,8 +375,7 @@ void InterfaceServer::ControlSocketServer() {
 
             info("Stopping server so it can restart");
             Stop();
-            info("... Stopped");
-
+            return;
 #endif
           default:
             info("Unsupported command %d", request->cmd);
