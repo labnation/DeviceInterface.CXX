@@ -76,6 +76,7 @@ enum Command : uint8_t {
   LEDE_REBOOT     = 0x43,
 #endif
   SERVER_VERSION  = 0x50,
+  SERVER_INFO     = 0x51,
 };
 
 struct __attribute__ ((__packed__)) Message {

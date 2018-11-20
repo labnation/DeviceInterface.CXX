@@ -261,6 +261,10 @@ void InterfaceServer::ControlSocketServer() {
             response->length = sizeof(version);
             memcpy(response->data, &version, response->length);
             break;
+          case SERVER_INFO:
+            snprintf((char *)response->data, response_data_size, "smartscope server v%d.%d-%s", VERSION_MAJOR, VERSION_MINOR, FLAVOR);
+            response->length = strlen((char *)response->data);
+            break;
           case SERIAL:
             serial = _scope->GetSerial();
             if(serial.length() == 0)
