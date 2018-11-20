@@ -110,7 +110,8 @@ void* InterfaceServer::ThreadStartDataSocketServer(void * ctx){
 void InterfaceServer::DataSocketServer() {
   sockaddr_in sa_cli;
   int length = 0, ret, sent;
-  uint8_t smartScopeBuffer[BUF_SIZE];
+  ss_buf = new uint8_t[DATA_BUF_SIZE];
+  memset(ss_buf, 0, DATA_BUF_SIZE);
 
   info("Waiting for data connection to be opened");
   socklen_t socklen = sizeof(sa_cli);
@@ -133,26 +134,29 @@ void InterfaceServer::DataSocketServer() {
 
     try
     {
-      length = _scope->GetAcquisition(BUF_SIZE, smartScopeBuffer);
+      length = _scope->GetAcquisition(DATA_BUF_SIZE, ss_buf);
     }
     catch(ScopeIOException e)
     {
       info("USB error %s", e.what());
       Destroy();
+      delete[] ss_buf;
       return;
     }
 
     sent = 0;
     while(sent < length) {
-      if((sent += send(_sock_data, &smartScopeBuffer[sent], length - sent, 0)) == -1) {
+      if((sent += send(_sock_data, &ss_buf[sent], length - sent, 0)) == -1) {
         error("Failure while sending to socket: %s", strerror(errno));
         Stop();
+        delete[] ss_buf;
         return;
       }
     }
   }
   info("Data thread aborted");
   Stop();
+  delete[] ss_buf;
 }
 
 void* InterfaceServer::ThreadStartControlSocketServer(void * ctx){
