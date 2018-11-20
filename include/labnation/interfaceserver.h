@@ -27,7 +27,7 @@
 #endif
 
 #define VERSION_MAJOR  1
-#define VERSION_MINOR  3
+#define VERSION_MINOR  4
 #define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
 
 #if DEBUG
