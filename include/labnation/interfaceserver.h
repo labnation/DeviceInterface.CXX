@@ -27,7 +27,7 @@
 #endif
 
 #define VERSION_MAJOR  1
-#define VERSION_MINOR  2
+#define VERSION_MINOR  3
 #define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
 
 #if DEBUG
@@ -117,7 +117,7 @@ private:
   static const int ACQUISITION_PACKET_SIZE = SZ_HDR + FETCH_SIZE_MAX;
   static const int DATA_SOCKET_BUFFER_SIZE = ACQUISITION_PACKET_SIZE * 2;
   static const int HDR_SZ = 4;
-  static const int BUF_SIZE = 8 * 1024;
+  static const int BUF_SIZE = 128 * 1024;
   static const int MSG_BUF_SIZE = 1024 * 1024;
 
   uint8_t *tx_buf;

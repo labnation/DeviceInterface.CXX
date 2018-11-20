@@ -227,6 +227,7 @@ void InterfaceServer::ControlSocketServer() {
   tx_buf = new uint8_t[BUF_SIZE];
   memset(tx_buf, 0, BUF_SIZE);
   response = (Message*)tx_buf;
+  uint32_t response_data_size = BUF_SIZE - sizeof(Message);
 
   msg_buf = new uint8_t[MSG_BUF_SIZE];
   memset(msg_buf, 0, MSG_BUF_SIZE);
@@ -322,6 +323,10 @@ void InterfaceServer::ControlSocketServer() {
               cmd_output = std::string("Failed");
 
             response->length = cmd_output.length();
+            if (response->length > response_data_size) {
+              warn("Truncating LEDE_RESET response from %d to %d bytes", cmd_output.length(), response_data_size);
+              response->length = response_data_size;
+            }
             memcpy(response->data, cmd_output.c_str(), response->length);
 
             break;
@@ -338,6 +343,10 @@ void InterfaceServer::ControlSocketServer() {
               cmd_output = std::string("Failed");
 
             response->length = cmd_output.length();
+            if (response->length > response_data_size) {
+              warn("Truncating LEDE_LIST_APS response from %d to %d bytes", cmd_output.length(), response_data_size);
+              response->length = response_data_size;
+            }
             memcpy(response->data, cmd_output.c_str(), response->length);
             break;
 
