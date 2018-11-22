@@ -35,7 +35,7 @@ endif
 LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
 
 ifdef DEBUG
-CFLAGS += -DDEBUG
+CFLAGS += -DDEBUG -g
 else
 CFLAGS += -O3
 endif
