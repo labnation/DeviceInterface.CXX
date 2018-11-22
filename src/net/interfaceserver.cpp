@@ -193,7 +193,7 @@ void InterfaceServer::ControlSocketServer() {
 #ifdef LEDE
   char cmd[255];
   char* cmd_var;
-  std::string cmd_output;
+  std::string cmd_output, ap_name;
   bool wep=false;
 #endif
 
@@ -390,6 +390,22 @@ void InterfaceServer::ControlSocketServer() {
             info("Stopping server so it can restart");
             Stop();
             return;
+          case LEDE_MODE_AP:
+            cmd_output=execute_cmd("/sbin/fw_printenv -n smartscope_serial");
+            ap_name = std::string("SmartScope ") + cmd_output;
+            info("Reverting to wifi access point [%s]", ap_name.c_str());
+
+            execute_cmd("/sbin/uci delete wireless.default_radio0.bssid");
+            execute_cmd("/sbin/uci delete wireless.default_radio0.key");
+            execute_cmd("/sbin/uci set wireless.default_radio0.network=lan");
+            execute_cmd("/sbin/uci set wireless.default_radio0.mode=ap");
+            sprintf(cmd, "/sbin/uci set wireless.default_radio0.ssid=\"%s\"", ap_name.c_str());
+            execute_cmd(cmd);
+            execute_cmd("/sbin/uci set wireless.default_radio0.encryption=none");
+            execute_cmd("/sbin/uci commit wireless");
+            execute_cmd("/sbin/wifi");
+            Stop();
+            break;
 #endif
           default:
             info("Unsupported command %d", request->cmd);
