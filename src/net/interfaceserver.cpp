@@ -391,7 +391,7 @@ void InterfaceServer::ControlSocketServer() {
             Stop();
             return;
           case LEDE_MODE_AP:
-            cmd_output=execute_cmd("/sbin/fw_printenv -n smartscope_serial");
+            cmd_output=execute_cmd("/usr/sbin/fw_printenv -n smartscope_serial");
             ap_name = std::string("SmartScope ") + cmd_output;
             info("Reverting to wifi access point [%s]", ap_name.c_str());
 
