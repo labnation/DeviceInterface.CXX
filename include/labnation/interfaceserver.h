@@ -122,9 +122,9 @@ private:
   static const int BUF_SIZE = 128 * 1024;
   static const int MSG_BUF_SIZE = 1024 * 1024;
 
-  uint8_t *ss_buf;
-  uint8_t *tx_buf;
-  uint8_t *msg_buf;
+  uint8_t *ss_buf = NULL;
+  uint8_t *tx_buf = NULL;
+  uint8_t *msg_buf = NULL;
 
   std::function<void(InterfaceServer*)> _stateChanged = NULL;
   const char* SERVICE_TYPE = "_sss._tcp";

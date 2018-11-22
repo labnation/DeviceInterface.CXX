@@ -140,7 +140,6 @@ void InterfaceServer::DataSocketServer() {
     {
       info("USB error %s", e.what());
       Destroy();
-      delete[] ss_buf;
       return;
     }
 
@@ -149,14 +148,12 @@ void InterfaceServer::DataSocketServer() {
       if((sent += send(_sock_data, &ss_buf[sent], length - sent, 0)) == -1) {
         error("Failure while sending to socket: %s", strerror(errno));
         Stop();
-        delete[] ss_buf;
         return;
       }
     }
   }
   info("Data thread aborted");
   Stop();
-  delete[] ss_buf;
 }
 
 void* InterfaceServer::ThreadStartControlSocketServer(void * ctx){
@@ -442,9 +439,20 @@ void InterfaceServer::Disconnect() {
   CleanSocketThread(&_thread_ctrl, &_sock_ctrl_listen, &_sock_ctrl);
   debug("closing data thread/socket");
   CleanSocketThread(&_thread_data, &_sock_data_listen, &_sock_data);
-  debug("Cleaning up message and tx buffers");
-  delete[] msg_buf;
-  delete[] tx_buf;
+  debug("Cleaning up buffers (%p / %p / %p)", msg_buf, tx_buf, ss_buf);
+
+  if (msg_buf) {
+    delete[] msg_buf;
+    msg_buf = NULL;
+  }
+  if (tx_buf) {
+    delete[] tx_buf;
+    tx_buf = NULL;
+  }
+  if (ss_buf) {
+    delete[] ss_buf;
+    ss_buf = NULL;
+  }
 }
 
 void InterfaceServer::CleanSocketThread(pthread_t* thread, int *listener_socket, int *socket)
@@ -485,9 +493,9 @@ void InterfaceServer::CleanSocketThread(pthread_t* thread, int *listener_socket,
   *thread = 0;
 }
 
-void InterfaceServer::Start()   { _stateRequested = Started; }
-void InterfaceServer::Stop()    { _stateRequested = Stopped; }
-void InterfaceServer::Destroy() { _stateRequested = Destroyed; }
+void InterfaceServer::Start()   { debug("STATE_REQ->STARTED");_stateRequested = Started; }
+void InterfaceServer::Stop()    { debug("STATE_REQ->STOPPED");_stateRequested = Stopped; }
+void InterfaceServer::Destroy() { debug("STATE_REQ->DSTROYD");_stateRequested = Destroyed; }
 
 void InterfaceServer::SetState(State state) {
   pthread_t current_thread = pthread_self();

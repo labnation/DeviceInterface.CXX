@@ -28,9 +28,18 @@ void handle_sighup(int sig)
   }
 }
 
+void handle_sigpipe(int sig)
+{
+  if(server) {
+    debug("SIGPIPE - Stopping server");
+    server->Stop();
+  }
+}
+
 int main(int argc, char *argv[])
 {
   signal(SIGHUP, handle_sighup);
+  signal(SIGPIPE, handle_sigpipe);
 
   libusb_init(NULL);
   //libusb_set_debug(usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
@@ -50,8 +59,10 @@ int main(int argc, char *argv[])
             server->Start();
             while(server->GetState() != InterfaceServer::State::Destroyed) {
               std::this_thread::sleep_for(std::chrono::milliseconds(100));
-              if(server->GetState() == InterfaceServer::State::Stopped)
+              if(server->GetState() == InterfaceServer::State::Stopped) {
+                debug("Restarting stopped server");
                 server->Start();
+              }
             }
             debug("Server destroyed - quitting");
             delete(server);
