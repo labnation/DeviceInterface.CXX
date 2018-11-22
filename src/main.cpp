@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
   libusb_init(NULL);
   //libusb_set_debug(usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
-  info("Starting smartscope server v%d.%d-%s", VERSION_MAJOR, VERSION_MINOR, FLAVOR);
+  info("Starting smartscope server v%d.%d-%s [built %s]", VERSION_MAJOR, VERSION_MINOR, FLAVOR, BUILD_VERSION);
   while(true)
   {
     int n = libusb_get_device_list(NULL, &devices);

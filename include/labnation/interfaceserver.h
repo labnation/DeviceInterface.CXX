@@ -36,6 +36,10 @@
 #define FLAVOR_DEBUG ""
 #endif
 
+#ifndef BUILD_VERSION
+#define BUILD_VERSION "sometime"
+#endif
+
 #if LEDE
 #define FLAVOR "lede" FLAVOR_DEBUG
 #elif DNSSD

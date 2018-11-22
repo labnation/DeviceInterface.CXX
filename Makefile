@@ -44,6 +44,9 @@ ifdef LEDE
 CFLAGS += -DLEDE
 endif
 
+ifdef BUILD_VERSION
+CFLAGS += -DBUILD_VERSION="\"$(BUILD_VERSION)\""
+endif
 
 .PHONY: all clean clear install
 
