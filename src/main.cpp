@@ -54,7 +54,16 @@ int main(int argc, char *argv[])
             j != SmartScopeUsb::PIDs.end(); ++j) {
           if(desc.idProduct == *j) {
 
-            scope = new SmartScopeUsb(devices[i]);
+            try
+            {
+              scope = new SmartScopeUsb(devices[i]);
+            }
+            catch(ScopeIOException e)
+            {
+              warn("Scope init error: %s", e.what());
+              continue;
+            }
+
             server = new InterfaceServer(scope);
             server->Start();
             while(server->GetState() != InterfaceServer::State::Destroyed) {
