@@ -12,12 +12,13 @@ INCLUDE_DIR_PARAM :=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 SRCS := \
 	main.cpp \
-        hardware/smartscopeusb.cpp \
-        net/interfaceserver.cpp \
-        utils.cpp
+	hardware/smartscopeusb.cpp \
+	net/interfaceserver.cpp \
+	utils.cpp
 
 ifdef LEDE
-SRCS += lede.cpp
+SRCS := $(SRCS)\
+	lede.cpp
 CFLAGS += -DLEDE
 endif
 
@@ -58,13 +59,13 @@ clean:
 
 install: all
 	install -m 755 -d $(DESTDIR)/usr/bin
-	install -m 755 $(OUT_DIR)/smartscopeserver $(DESTDIR)/usr/bin
+	install -m 755 smartscopeserver $(DESTDIR)/usr/bin
 
 -include $(DEPS)
 
 smartscopeserver: $(OBJS)
 	@printf " Making %s %s\n" $@ $^
-	$(CC) -o $(OUT_DIR)/$@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(OUT_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	@printf "  CC      %s\n" $@
