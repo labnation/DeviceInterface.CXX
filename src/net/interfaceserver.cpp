@@ -151,7 +151,8 @@ void InterfaceServer::DataSocketServer() {
   debug("Data socket size = %d bytes", length);
 
 
-  timeout.tv_sec = TIMEOUT_DATA;
+  //https://stackoverflow.com/questions/21783599/socket-so-sndtimeo-timout-is-double-the-set-value/36642105
+  timeout.tv_sec = TIMEOUT_DATA/2;
   timeout.tv_usec = 0;
   ret = setsockopt(_sock_data, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
   if(ret)
@@ -254,7 +255,8 @@ void InterfaceServer::ControlSocketServer() {
 
   info("Connection accepted from %s:%d", inet_ntoa(sa_cli.sin_addr), ntohs(sa_cli.sin_port));
 
-  timeout.tv_sec = TIMEOUT_CTRL;
+  //https://stackoverflow.com/questions/21783599/socket-so-sndtimeo-timout-is-double-the-set-value/36642105
+  timeout.tv_sec = TIMEOUT_CTRL/2;
   timeout.tv_usec = 0;
   ret = setsockopt(_sock_ctrl, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
   if(ret)
