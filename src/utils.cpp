@@ -100,7 +100,6 @@ std::string execute_cmd(const char* cmd) {
 
 bool iface_has_addr() {
   char interface[] = "wlan0";
-  char * cmd;
   debug("Checkinf if interface %s has an IP", interface);
   struct ifaddrs *ifaddr, *ifa;
   struct sockaddr_in *sa;
@@ -117,7 +116,7 @@ bool iface_has_addr() {
       continue;
     }
     sa = (struct sockaddr_in *) ifa->ifa_addr;
-    debug("IP found for interface: %s = %s\n", ifa->ifa_name, inet_ntoa(sa->sin_addr));
+    info("IP found for interface: %s = %s\n", ifa->ifa_name, inet_ntoa(sa->sin_addr));
     freeifaddrs(ifaddr);
     return true;
   }
