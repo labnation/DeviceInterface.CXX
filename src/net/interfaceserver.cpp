@@ -306,10 +306,14 @@ void InterfaceServer::ControlSocketServer() {
             response->length = sizeof(version);
             memcpy(response->data, &version, response->length);
             break;
+
           case SERVER_INFO:
-            snprintf((char *)response->data, response_data_size, "smartscope server v%d.%d-%s [built %s]", VERSION_MAJOR, VERSION_MINOR, FLAVOR, BUILD_VERSION);
+            snprintf((char *)response->data, response_data_size,
+              "smartscope server v%d.%d-%s [built %s]",
+              VERSION_MAJOR, VERSION_MINOR, FLAVOR, BUILD_VERSION);
             response->length = strlen((char *)response->data);
             break;
+
           case SERIAL:
             serial = _scope->GetSerial();
             if(serial.length() == 0)
@@ -317,38 +321,45 @@ void InterfaceServer::ControlSocketServer() {
             response->length = 11;
             memcpy(response->data, serial.c_str(), response->length);
             break;
+
           case PIC_FW_VERSION:
             version = _scope->GetPicFirmwareVersion();
             response->length = sizeof(version);
             memcpy(response->data, &version, response->length);
             break;
+
           case FLUSH:
             response->length = 0;
             _scope->FlushDataPipe();
             break;
+
           case FLASH_FPGA:
             response->length = 1;
             response->data[0] = 0xff;
             _scope->FlashFpga(request->length - HDR_SZ, request->data);
             break;
+
           case DISCONNECT:
             response->length = 0;
             info("Received Disconnect request from client");
             _scope->FlushDataPipe();
             Stop();
             return;
+
           case DATA:
             if(_thread_data)
               throw NetException("Should not mix data socket with data through control socket");
             response->length = *(uint16_t *)request->data;
             _scope->GetData(response->length, response->data, 0);
             break;
+
           case DATA_PORT:
             info("Starting data server...");
             pthread_create(&_thread_data, NULL, this->ThreadStartDataSocketServer, this);
             response->length = sizeof(_port_data);
             memcpy(response->data, &_port_data, response->length);
             break;
+
           case ACQUISITION:
             if(_thread_data)
               throw NetException("Should not mix data socket with data through control socket");
@@ -356,11 +367,13 @@ void InterfaceServer::ControlSocketServer() {
                 response->length = _scope->GetAcquisition(BUF_SIZE - HDR_SZ, response->data);
             } while(response->length == 0);
             break;
+
           case SET:
             response->length = 0;
             ctrl_msg = (ControllerMessage *)request->data;
             _scope->SetControllerRegister(ctrl_msg->ctrl, ctrl_msg->addr, ctrl_msg->len, ctrl_msg->data);
             break;
+
           case GET:
             ctrl_msg = (ControllerMessage *)request->data;
             memcpy(response->data, ctrl_msg, sizeof(ControllerMessage));
@@ -368,6 +381,7 @@ void InterfaceServer::ControlSocketServer() {
             _scope->GetControllerRegister(ctrl_msg->ctrl, ctrl_msg->addr, ctrl_msg->len,
                                           ((ControllerMessage*)response->data)->data);
             break;
+
 #ifdef LEDE
           case LEDE_RESET:
             cmd_output = lede_reset();
@@ -377,7 +391,6 @@ void InterfaceServer::ControlSocketServer() {
               response->length = response_data_size;
             }
             memcpy(response->data, cmd_output.c_str(), response->length);
-
             break;
 
           case LEDE_REBOOT:
