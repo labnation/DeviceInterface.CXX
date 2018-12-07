@@ -16,6 +16,11 @@ SRCS := \
         net/interfaceserver.cpp \
         utils.cpp
 
+ifdef LEDE
+SRCS += lede.cpp
+CFLAGS += -DLEDE
+endif
+
 OBJS := $(SRCS:.cpp=.cpp.o)
 OBJS := $(addprefix $(OUT_DIR)/,$(OBJS))
 DEPS := $(OBJS:.o=.d)
@@ -38,10 +43,6 @@ ifdef DEBUG
 CFLAGS += -DDEBUG -g
 else
 CFLAGS += -O3
-endif
-
-ifdef LEDE
-CFLAGS += -DLEDE
 endif
 
 ifdef BUILD_VERSION

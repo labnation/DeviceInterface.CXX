@@ -9,6 +9,10 @@
 #include <labnation/smartscopeusb.h>
 #include <labnation/interfaceserver.h>
 
+#ifdef LEDE
+#include <labnation/lede.h>
+#endif
+
 using namespace labnation;
 
 libusb_context* usb_ctx;
@@ -19,6 +23,7 @@ InterfaceServer* server;
 
 const uint8_t FPGA_I2C_ADDRESS_SETTINGS = 0x0C;
 const uint8_t FPGA_I2C_ADDRESS_ROM = 0x0D;
+bool running = true;
 
 void handle_sighup(int sig)
 {
@@ -36,15 +41,29 @@ void handle_sigpipe(int sig)
   }
 }
 
+void handle_sigint(int sig)
+{
+  running = false;
+  if(server) {
+    debug("SIGINT - Destroying server");
+    server->Destroy();
+  }
+}
 int main(int argc, char *argv[])
 {
   signal(SIGHUP, handle_sighup);
   signal(SIGPIPE, handle_sigpipe);
+  signal(SIGINT, handle_sigint);
+
+#ifdef LEDE
+  lede_set_wifi_led();
+  set_led_timer(LED_GREEN, 0, 1000);
+#endif
 
   libusb_init(NULL);
   //libusb_set_debug(usb_ctx, LIBUSB_LOG_LEVEL_DEBUG);
   info("Starting smartscope server v%d.%d-%s [built %s]", VERSION_MAJOR, VERSION_MINOR, FLAVOR, BUILD_VERSION);
-  while(true)
+  while(running)
   {
     int n = libusb_get_device_list(NULL, &devices);
     for(int i = 0; i < n; i++) {
@@ -69,10 +88,16 @@ int main(int argc, char *argv[])
             while(server->GetState() != InterfaceServer::State::Destroyed) {
               std::this_thread::sleep_for(std::chrono::milliseconds(100));
               if(server->GetState() == InterfaceServer::State::Stopped) {
+                #ifdef LEDE
+                  // If restarting due to SIGHUP, AP might have changed
+                  lede_set_wifi_led();
+                  set_led_timer(LED_GREEN, 0, 1000);
+                #endif
                 debug("Restarting stopped server");
                 server->Start();
               }
             }
+            set_led_timer(LED_GREEN, 0, 1000);
             debug("Server destroyed - quitting");
             delete(server);
             delete(scope);
@@ -84,5 +109,7 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   libusb_exit(NULL);
+  set_led_timer(LED_BLUE, 1000, 0);
+  set_led_timer(LED_GREEN, 0, 1000);
   info("Server quiting");
 }

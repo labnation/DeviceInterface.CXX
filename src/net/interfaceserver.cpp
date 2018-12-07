@@ -13,6 +13,10 @@
 #include <utils.h>
 #include <netinet/tcp.h>
 
+#ifdef LEDE
+#include <labnation/lede.h>
+#endif
+
 namespace labnation {
 
 NetException::NetException(const char* message, ...) {
@@ -79,6 +83,9 @@ void InterfaceServer::ManageState() {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
       SetState(Started);
       debug("=============================== Started ===");
+#ifdef LEDE
+      set_led_timer(LED_GREEN, 1000, 1000);
+#endif
       break;
     case Stopped:
       debug("=== Stopping server ======================");
@@ -86,6 +93,9 @@ void InterfaceServer::ManageState() {
       Disconnect();
       SetState(Stopped);
       debug("=============================== Stopped ===");
+#ifdef LEDE
+      set_led_timer(LED_GREEN, 0, 0);
+#endif
       break;
     case Destroyed:
       debug("=== Destroying server ====================");
@@ -93,6 +103,9 @@ void InterfaceServer::ManageState() {
       Disconnect();
       SetState(Destroyed);
       debug("============================ Destroyed ===");
+#ifdef LEDE
+      set_led_timer(LED_GREEN, 0, 0);
+#endif
       break;
     default:
       throw new NetException("Illegal target state requested %d", nextState);
@@ -191,10 +204,7 @@ void InterfaceServer::ControlSocketServer() {
   uint32_t version;
 
 #ifdef LEDE
-  char cmd[255];
-  char* cmd_var;
-  std::string cmd_output, ap_name;
-  bool wep=false;
+  std::string cmd_output;
 #endif
 
   /* Start control server */
@@ -222,6 +232,10 @@ void InterfaceServer::ControlSocketServer() {
     throw NetException("Failed to accept connection %s", strerror(errno));
 
   info("Connection accepted from %s:%d", inet_ntoa(sa_cli.sin_addr), ntohs(sa_cli.sin_port));
+#ifdef LEDE
+  set_led_timer(LED_GREEN, 250, 250);
+  _changing_ap = false;
+#endif
   UnregisterService();
   _connected = true;
 
@@ -322,11 +336,7 @@ void InterfaceServer::ControlSocketServer() {
             break;
 #ifdef LEDE
           case LEDE_RESET:
-            info("Factory resetting device");
-            cmd_output = execute_cmd(LEDE_CMD_RESET);
-            if (cmd_output.length() == 0)
-              cmd_output = std::string("Failed");
-
+            cmd_output = lede_reset();
             response->length = cmd_output.length();
             if (response->length > response_data_size) {
               warn("Truncating LEDE_RESET response from %d to %d bytes", cmd_output.length(), response_data_size);
@@ -337,16 +347,12 @@ void InterfaceServer::ControlSocketServer() {
             break;
 
           case LEDE_REBOOT:
-            info("Rebooting device");
-            cmd_output = execute_cmd(LEDE_CMD_REBOOT);
+            lede_reboot();
             response->length = 0;
             break;
 
           case LEDE_LIST_APS:
-            cmd_output = execute_cmd(LEDE_CMD_LIST_APS);
-            if (cmd_output.length() == 0)
-              cmd_output = std::string("Failed");
-
+            cmd_output = lede_list_aps();
             response->length = cmd_output.length();
             if (response->length > response_data_size) {
               warn("Truncating LEDE_LIST_APS response from %d to %d bytes", cmd_output.length(), response_data_size);
@@ -356,54 +362,18 @@ void InterfaceServer::ControlSocketServer() {
             break;
 
           case LEDE_CONNECT_AP:
-            execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
-            execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
-
-            cmd_var=(char*)request->data;
-            sprintf(cmd, "/sbin/uci set wireless.default_radio0.ssid=\"%s\"", cmd_var);
-            execute_cmd(cmd);
-
-            cmd_var += strlen(cmd_var) + 1;
-            wep = strcmp("wep", cmd_var) ? false : true;
-            sprintf(cmd, "/sbin/uci set wireless.default_radio0.encryption=\"%s\"", cmd_var);
-            execute_cmd(cmd);
-
-            cmd_var += strlen(cmd_var) + 1;
-            sprintf(cmd, "/sbin/uci set wireless.default_radio0.bssid=\"%s\"", cmd_var);
-            execute_cmd(cmd);
-
-            cmd_var += strlen(cmd_var) + 1;
-            debug("Using wep? %d", wep);
-            if(wep) {
-              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=1");
-              execute_cmd(cmd);
-              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key1=\"%s\"", cmd_var);
-              execute_cmd(cmd);
-            } else {
-              sprintf(cmd, "/sbin/uci set wireless.default_radio0.key=\"%s\"", cmd_var);
-              execute_cmd(cmd);
+            _changing_ap = true;
+            if(!lede_connect_ap((char *)request->data)) {
+              warn("Failed to connect to AP, reverting to own AP");
+              lede_mode_ap();
             }
-
-            execute_cmd("/sbin/uci commit wireless");
-            execute_cmd("/sbin/wifi");
-
+            _changing_ap = false;
             info("Stopping server so it can restart");
             Stop();
             return;
-          case LEDE_MODE_AP:
-            cmd_output=execute_cmd("/usr/sbin/fw_printenv -n smartscope_serial");
-            ap_name = std::string("SmartScope ") + cmd_output;
-            info("Reverting to wifi access point [%s]", ap_name.c_str());
 
-            execute_cmd("/sbin/uci delete wireless.default_radio0.bssid");
-            execute_cmd("/sbin/uci delete wireless.default_radio0.key");
-            execute_cmd("/sbin/uci set wireless.default_radio0.network=lan");
-            execute_cmd("/sbin/uci set wireless.default_radio0.mode=ap");
-            sprintf(cmd, "/sbin/uci set wireless.default_radio0.ssid=\"%s\"", ap_name.c_str());
-            execute_cmd(cmd);
-            execute_cmd("/sbin/uci set wireless.default_radio0.encryption=none");
-            execute_cmd("/sbin/uci commit wireless");
-            execute_cmd("/sbin/wifi");
+          case LEDE_MODE_AP:
+            lede_mode_ap();
             Stop();
             break;
 #endif
@@ -441,6 +411,13 @@ void InterfaceServer::Disconnect() {
   pthread_t current_thread = pthread_self();
   if (!pthread_equal(current_thread, _thread_state))
     throw new NetException("State changing from wrong thread %p", &current_thread);
+
+#ifdef LEDE
+    if(_changing_ap) {
+      debug("Not performing disconnect while changing AP, to retain thread activity");
+      return;
+    }
+#endif
 
   if (_disconnect_called) {
       if (_connected)

@@ -20,12 +20,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#ifdef LEDE
-#define LEDE_CMD_LIST_APS   "/usr/sbin/iw dev wlan0 scan"
-#define LEDE_CMD_RESET      "yes | /sbin/firstboot"
-#define LEDE_CMD_REBOOT     "/sbin/reboot"
-#endif
-
 #define VERSION_MAJOR  1
 #define VERSION_MINOR  6
 #define VERSION ((VERSION_MAJOR << 8) + VERSION_MINOR)
@@ -142,7 +136,9 @@ private:
   uint16_t _port = 0;
   uint16_t _port_data = 0;
   bool _connected = false;
-
+#ifdef LEDE
+  bool _changing_ap = false;
+#endif
   bool _disconnect_called = false;
 
   /* Zeroconf service registration */
