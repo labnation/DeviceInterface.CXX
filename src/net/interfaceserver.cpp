@@ -35,6 +35,9 @@ InterfaceServer::InterfaceServer(SmartScopeUsb* scope) {
   _avahi_poll = avahi_threaded_poll_new();
   _avahi_client = avahi_client_new(avahi_threaded_poll_get(_avahi_poll), AVAHI_CLIENT_NO_FAIL,
                                    InterfaceServer::AvahiCallback, this, NULL);
+  _avahi_entry_group = avahi_entry_group_new(_avahi_client,
+                                   InterfaceServer::AvahiGroupChanged, this);
+
 #endif
 
   _scope = scope;
@@ -46,6 +49,7 @@ InterfaceServer::InterfaceServer(SmartScopeUsb* scope) {
 InterfaceServer::~InterfaceServer() {
 #ifndef DNSSD
   avahi_threaded_poll_stop(_avahi_poll);
+  avahi_entry_group_free(_avahi_entry_group);
   avahi_client_free(_avahi_client);
   avahi_threaded_poll_free(_avahi_poll);
 #endif
@@ -533,7 +537,7 @@ void InterfaceServer::SetState(State state) {
 InterfaceServer::State InterfaceServer::GetState() { return _state; }
 
 void InterfaceServer::RegisterService() {
-  std::string name = "SmartScope []";
+  std::string name = "SmartScope " + _scope->GetSerial();
 #ifdef DNSSD
   DNSServiceErrorType err = DNSServiceRegister(
         &_dnsService, 0, 0, name.c_str(), SERVICE_TYPE,
@@ -542,9 +546,9 @@ void InterfaceServer::RegisterService() {
     error("Failure while registering service: %d", err);
 #else
   int err;
-  _avahi_entry_group = avahi_entry_group_new(_avahi_client, InterfaceServer::AvahiGroupChanged, this);
-  err = avahi_entry_group_add_service(_avahi_entry_group, AVAHI_IF_UNSPEC, AVAHI_PROTO_INET, (AvahiPublishFlags)0,
-                                name.c_str(), SERVICE_TYPE, NULL, NULL, _port, NULL);
+  err = avahi_entry_group_add_service(_avahi_entry_group,
+                        AVAHI_IF_UNSPEC, AVAHI_PROTO_INET, (AvahiPublishFlags)0,
+                        name.c_str(), SERVICE_TYPE, NULL, NULL, _port, (void *)NULL);
   if(err)
     throw NetException("Failed to add service to avahi entry group: %s", avahi_strerror(err));
 
@@ -553,7 +557,7 @@ void InterfaceServer::RegisterService() {
     throw NetException("Failed to commit entry group: %s", avahi_strerror(err));
 
 #endif
-  info("Zeroconf service registered");
+  info("Zeroconf service [%s] registered", name.c_str());
 }
 
 #ifdef DNSSD
