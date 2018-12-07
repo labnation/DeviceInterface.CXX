@@ -6,8 +6,8 @@
 #define LEDE_CMD_RESET      "yes | /sbin/firstboot"
 #define LEDE_CMD_REBOOT     "/sbin/reboot"
 
-#define LED_GREEN "/sys/devices/platform/gpio-leds/leds/zl5900v2:green:lan"
-#define LED_BLUE "/sys/devices/platform/gpio-leds/leds/zl5900v2:blue:power"
+#define LED_WIFI "/sys/devices/platform/gpio-leds/leds/zl5900v2:green:lan"
+#define LED_SMARTSCOPE "/sys/devices/platform/gpio-leds/leds/zl5900v2:blue:power"
 
 void set_led_timer(const char * led, int delay_on, int delay_off);
 

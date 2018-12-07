@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 #ifdef LEDE
   lede_set_wifi_led();
-  set_led_timer(LED_GREEN, 0, 1000);
+  set_led_timer(LED_SMARTSCOPE, 0, 1000);
 #endif
 
   libusb_init(NULL);
@@ -91,13 +91,11 @@ int main(int argc, char *argv[])
                 #ifdef LEDE
                   // If restarting due to SIGHUP, AP might have changed
                   lede_set_wifi_led();
-                  set_led_timer(LED_GREEN, 0, 1000);
                 #endif
                 debug("Restarting stopped server");
                 server->Start();
               }
             }
-            set_led_timer(LED_GREEN, 0, 1000);
             debug("Server destroyed - quitting");
             delete(server);
             delete(scope);
@@ -109,7 +107,7 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   libusb_exit(NULL);
-  set_led_timer(LED_BLUE, 1000, 0);
-  set_led_timer(LED_GREEN, 0, 1000);
+  set_led_timer(LED_WIFI, 1000, 0);
+  set_led_timer(LED_SMARTSCOPE, 0, 1000);
   info("Server quiting");
 }

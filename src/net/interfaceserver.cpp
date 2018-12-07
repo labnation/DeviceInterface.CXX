@@ -89,7 +89,7 @@ void InterfaceServer::ManageState() {
       SetState(Started);
       debug("=============================== Started ===");
 #ifdef LEDE
-      set_led_timer(LED_GREEN, 1000, 1000);
+      set_led_timer(LED_SMARTSCOPE, 1000, 0);
 #endif
       break;
     case Stopped:
@@ -99,7 +99,7 @@ void InterfaceServer::ManageState() {
       SetState(Stopped);
       debug("=============================== Stopped ===");
 #ifdef LEDE
-      set_led_timer(LED_GREEN, 0, 0);
+      set_led_timer(LED_SMARTSCOPE, 0, 1000);
 #endif
       break;
     case Destroyed:
@@ -109,7 +109,7 @@ void InterfaceServer::ManageState() {
       SetState(Destroyed);
       debug("============================ Destroyed ===");
 #ifdef LEDE
-      set_led_timer(LED_GREEN, 0, 0);
+      set_led_timer(LED_SMARTSCOPE, 0, 1000);
 #endif
       break;
     default:
@@ -260,14 +260,14 @@ void InterfaceServer::ControlSocketServer() {
   timeout.tv_usec = 0;
   ret = setsockopt(_sock_ctrl, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
   if(ret)
-    throw NetException("Failed to set control socket timeout: %s", strerror(errno));
+    throw NetException("Failed to set control socket send timeout: %s", strerror(errno));
   ret = getsockopt(_sock_ctrl, SOL_SOCKET, SO_SNDTIMEO, &timeout, &socklen);
   if(ret)
-    throw NetException("Failed to get control socket timeout: %s", strerror(errno));
+    throw NetException("Failed to get control socket send timeout: %s", strerror(errno));
   debug("Control socket timeout %ld.%06ld s", timeout.tv_sec, timeout.tv_usec);
 
 #ifdef LEDE
-  set_led_timer(LED_GREEN, 250, 250);
+  set_led_timer(LED_SMARTSCOPE, 1000, 1000);
   _changing_ap = false;
 #endif
   UnregisterService();

@@ -50,8 +50,8 @@ std::string lede_reset() {
 void lede_reboot() {
   info("Rebooting device");
   execute_cmd(LEDE_CMD_REBOOT);
-  set_led_timer(LED_BLUE, 200, 200);
-  set_led_timer(LED_GREEN, 200, 200);
+  set_led_timer(LED_WIFI, 200, 200);
+  set_led_timer(LED_SMARTSCOPE, 200, 200);
 }
 
 std::string lede_list_aps() {
@@ -73,14 +73,14 @@ void lede_set_wifi_led()
     info("Client mode, setting LED to be on real short");
     if(iface_has_addr()) {
       debug("GOT ip, blinking soso");
-      set_led_timer(LED_BLUE, 100, 400);
+      set_led_timer(LED_WIFI, 2000, 500);
     } else {
       debug("No ip, blinking fast");
-      set_led_timer(LED_BLUE, 100, 100);
+      set_led_timer(LED_WIFI, 250, 250);
     }
   } else {
     info("AP mode, setting LED to be on long");
-    set_led_timer(LED_BLUE, 900, 100);
+    set_led_timer(LED_WIFI, 1000, 1000);
   }
   iface_has_addr();
 }
