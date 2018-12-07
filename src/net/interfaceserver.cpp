@@ -12,6 +12,7 @@
 #include <time.h>
 #include <utils.h>
 #include <netinet/tcp.h>
+#include <sys/time.h>
 
 #ifdef LEDE
 #include <labnation/lede.h>
@@ -123,6 +124,8 @@ void* InterfaceServer::ThreadStartDataSocketServer(void * ctx){
 void InterfaceServer::DataSocketServer() {
   sockaddr_in sa_cli;
   int length = 0, ret, sent;
+  struct timeval timeout = {};
+
   ss_buf = new uint8_t[DATA_BUF_SIZE];
   memset(ss_buf, 0, DATA_BUF_SIZE);
 
@@ -136,12 +139,23 @@ void InterfaceServer::DataSocketServer() {
   length = DATA_SOCKET_BUFFER_SIZE;
   ret = setsockopt(_sock_data, SOL_SOCKET, SO_SNDBUF, &length, sizeof(int));
   if(ret)
-    throw NetException("Data failed to set socket send buffer: %s", strerror(errno));
+    throw NetException("Failed to set data socket send buffer: %s", strerror(errno));
 
   ret = getsockopt(_sock_data, SOL_SOCKET, SO_SNDBUF, &length, &socklen);
   if(ret)
-    throw NetException("Data failed to set socket send buffer: %s", strerror(errno));
+    throw NetException("Failed to get data socket send buffer: %s", strerror(errno));
   debug("Data socket size = %d bytes", length);
+
+
+  timeout.tv_sec = TIMEOUT_DATA;
+  timeout.tv_usec = 0;
+  ret = setsockopt(_sock_data, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
+  if(ret)
+    throw NetException("Failed to set data socket timeout: %s", strerror(errno));
+  ret = getsockopt(_sock_data, SOL_SOCKET, SO_SNDTIMEO, &timeout, &socklen);
+  if(ret)
+    throw NetException("Failed to get data socket timeout: %s", strerror(errno));
+  debug("Data socket timeout %ld.%06ld s", timeout.tv_sec, timeout.tv_usec);
 
   while (_connected) {
 
@@ -158,11 +172,13 @@ void InterfaceServer::DataSocketServer() {
 
     sent = 0;
     while(sent < length) {
-      if((sent += send(_sock_data, &ss_buf[sent], length - sent, 0)) == -1) {
+      ret = send(_sock_data, &ss_buf[sent], length - sent, 0);
+      if(ret == -1) {
         error("Failure while sending to socket: %s", strerror(errno));
         Stop();
         return;
       }
+      sent += ret;
     }
   }
   info("Data thread aborted");
@@ -198,6 +214,7 @@ void InterfaceServer::ControlSocketServer() {
 
   sockaddr_in sa, sa_cli;
   socklen_t socklen = sizeof(sa);
+  struct timeval timeout = {};
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   std::string serial;
@@ -232,6 +249,17 @@ void InterfaceServer::ControlSocketServer() {
     throw NetException("Failed to accept connection %s", strerror(errno));
 
   info("Connection accepted from %s:%d", inet_ntoa(sa_cli.sin_addr), ntohs(sa_cli.sin_port));
+
+  timeout.tv_sec = TIMEOUT_CTRL;
+  timeout.tv_usec = 0;
+  ret = setsockopt(_sock_ctrl, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(struct timeval));
+  if(ret)
+    throw NetException("Failed to set control socket timeout: %s", strerror(errno));
+  ret = getsockopt(_sock_ctrl, SOL_SOCKET, SO_SNDTIMEO, &timeout, &socklen);
+  if(ret)
+    throw NetException("Failed to get control socket timeout: %s", strerror(errno));
+  debug("Control socket timeout %ld.%06ld s", timeout.tv_sec, timeout.tv_usec);
+
 #ifdef LEDE
   set_led_timer(LED_GREEN, 250, 250);
   _changing_ap = false;
@@ -386,9 +414,13 @@ void InterfaceServer::ControlSocketServer() {
           {
             response->length += sizeof(Message);
             uint sent = 0;
-            while(sent < response->length)
-                sent += send(_sock_ctrl, &tx_buf[sent], response->length - sent, 0);
-
+            while(sent < response->length) {
+              ret = send(_sock_ctrl, &tx_buf[sent], response->length - sent, 0);
+              if (ret == -1) {
+                throw new NetException("Failed to send to control socket");
+              }
+              sent += ret;
+            }
           }
       }
 copy_down:

@@ -42,6 +42,9 @@
 #define FLAVOR "vanilla" FLAVOR_DEBUG
 #endif
 
+#define TIMEOUT_DATA 4
+#define TIMEOUT_CTRL 4
+
 namespace labnation {
 
 class NetException: public std::exception {
