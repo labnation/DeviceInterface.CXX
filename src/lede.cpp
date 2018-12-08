@@ -88,7 +88,7 @@ void lede_set_wifi_led()
 bool lede_connect_ap(char * ap_data) {
   char cmd[255];
   bool wep=false;
-  int retries = 60;
+  int retries = 30;
 
   execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
   execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
