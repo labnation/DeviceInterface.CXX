@@ -13,7 +13,7 @@ std::string execute_cmd(const char* cmd);
 
 #define member_size(type, member) sizeof(((type *)0)->member)
 
-bool iface_has_addr();
+bool iface_has_addr(const char* interface);
 
 static inline void ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {

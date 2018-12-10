@@ -32,7 +32,7 @@ void write_to_file(const char * filename, const char * text, int len) {
 }
 
 std::string lede_default_ap_name() {
-  std::string name = std::string("SmartScope ") +
+  static std::string name = std::string("SmartScope ") +
     execute_cmd("/usr/sbin/fw_printenv -n smartscope_serial");
   rtrim(name);
   return name;
@@ -50,8 +50,8 @@ std::string lede_reset() {
 void lede_reboot() {
   info("Rebooting device");
   execute_cmd(LEDE_CMD_REBOOT);
-  set_led_timer(LED_WIFI, 200, 200);
-  set_led_timer(LED_SMARTSCOPE, 200, 200);
+  set_led_timer(LED_GREEN, 200, 200);
+  set_led_timer(LED_BLUE, 200, 200);
 }
 
 std::string lede_list_aps() {
@@ -62,33 +62,42 @@ std::string lede_list_aps() {
   return cmd_output;
 }
 
-void lede_set_wifi_led()
+bool lede_has_wifi_ip()
 {
-  std::string ap_name;
-  ap_name = execute_cmd("/sbin/uci get wireless.default_radio0.ssid");
-  rtrim(ap_name);
-  debug("Comparing %s to %s", ap_name.c_str(), lede_default_ap_name().c_str());
-  if (ap_name.compare(lede_default_ap_name())) {
-    //Not default AP
-    info("Client mode, setting LED to be on real short");
-    if(iface_has_addr()) {
-      debug("GOT ip, blinking soso");
-      set_led_timer(LED_WIFI, 2000, 500);
-    } else {
-      debug("No ip, blinking fast");
-      set_led_timer(LED_WIFI, 250, 250);
-    }
-  } else {
-    info("AP mode, setting LED to be on long");
-    set_led_timer(LED_WIFI, 1000, 1000);
-  }
-  iface_has_addr();
+  return iface_has_addr(WIFI_IFACE);
 }
 
-bool lede_connect_ap(char * ap_data) {
+bool lede_is_ap()
+{
+  std::string radio_mode;
+  radio_mode = execute_cmd("/sbin/uci get wireless.default_radio0.mode");
+  return radio_mode.compare("ap\n") == 0;
+}
+
+void lede_set_led()
+{
+  debug("Updating LEDs");
+  if (lede_is_ap()) {
+    info("AP mode LED config");
+    set_led_timer(LED_GREEN, 1000, 0);
+    set_led_timer(LED_BLUE, 1000, 0);
+  } else {
+    //Not default AP
+    info("Client mode LED config");
+    set_led_timer(LED_BLUE, 0, 1000);
+    if(lede_has_wifi_ip()) {
+      debug("Got IP");
+      set_led_timer(LED_GREEN, 1000, 0);
+    } else {
+      debug("No ip, blinking fast");
+      set_led_timer(LED_GREEN, 250, 250);
+    }
+  }
+}
+
+void lede_connect_ap(char * ap_data) {
   char cmd[255];
   bool wep=false;
-  int retries = 30;
 
   execute_cmd("/sbin/uci set wireless.default_radio0.network=wwan");
   execute_cmd("/sbin/uci set wireless.default_radio0.mode=sta");
@@ -119,14 +128,7 @@ bool lede_connect_ap(char * ap_data) {
 
   execute_cmd("/sbin/uci commit wireless");
   execute_cmd("/sbin/wifi");
-  lede_set_wifi_led();
-  while(iface_has_addr() == false && retries > 0) {
-    debug("%d tries left", retries);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    retries--;
-  }
-  lede_set_wifi_led();
-  return iface_has_addr();
+  lede_set_led();
 }
 
 void lede_mode_ap() {
@@ -143,5 +145,5 @@ void lede_mode_ap() {
   execute_cmd("/sbin/uci set wireless.default_radio0.encryption=none");
   execute_cmd("/sbin/uci commit wireless");
   execute_cmd("/sbin/wifi");
-  lede_set_wifi_led();
+  lede_set_led();
 }

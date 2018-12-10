@@ -140,7 +140,7 @@ private:
   uint16_t _port_data = 0;
   bool _connected = false;
 #ifdef LEDE
-  bool _changing_ap = false;
+  bool _changing_ap = true;
 #endif
   bool _disconnect_called = false;
 

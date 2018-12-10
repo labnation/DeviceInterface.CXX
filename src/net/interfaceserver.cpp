@@ -15,6 +15,7 @@
 #include <sys/time.h>
 
 #ifdef LEDE
+#include <chrono>
 #include <labnation/lede.h>
 #endif
 
@@ -66,11 +67,41 @@ void* InterfaceServer::ThreadStartManageState(void * ctx) {
 }
 
 void InterfaceServer::ManageState() {
+#ifdef LEDE
+  std::chrono::system_clock::time_point last_time_with_ip = std::chrono::system_clock::now();
+  std::chrono::milliseconds time_since_ip_ok;
+#endif
+
   while (_state != Destroyed)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     if (_state == Destroying || _state == Starting || _state == Stopping)
       throw new NetException("Server state transitioning outside of state manager thread");
+
+#ifdef LEDE
+    time_since_ip_ok = std::chrono::duration_cast<std::chrono::milliseconds>
+      (std::chrono::system_clock::now() - last_time_with_ip);
+
+    if(_changing_ap || time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
+      debug("Checking if we have an IP");
+      if(lede_is_ap()) {
+        _changing_ap = false;
+        last_time_with_ip = std::chrono::system_clock::now();
+      } else {
+        if(lede_has_wifi_ip()) {
+          _changing_ap = false;
+          last_time_with_ip = std::chrono::system_clock::now();
+          lede_set_led();
+        } else {
+          debug("OMG still no IP");
+          if(time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
+            info("Too long without IP, moving back to AP mode");
+            lede_mode_ap();
+          }
+        }
+      }
+    }
+#endif
 
     //Local copy of stateRequested so code below is thread safe
     State nextState = _stateRequested;
@@ -89,7 +120,7 @@ void InterfaceServer::ManageState() {
       SetState(Started);
       debug("=============================== Started ===");
 #ifdef LEDE
-      set_led_timer(LED_SMARTSCOPE, 1000, 0);
+      lede_set_led();
 #endif
       break;
     case Stopped:
@@ -98,9 +129,6 @@ void InterfaceServer::ManageState() {
       Disconnect();
       SetState(Stopped);
       debug("=============================== Stopped ===");
-#ifdef LEDE
-      set_led_timer(LED_SMARTSCOPE, 0, 1000);
-#endif
       break;
     case Destroyed:
       debug("=== Destroying server ====================");
@@ -108,9 +136,6 @@ void InterfaceServer::ManageState() {
       Disconnect();
       SetState(Destroyed);
       debug("============================ Destroyed ===");
-#ifdef LEDE
-      set_led_timer(LED_SMARTSCOPE, 0, 1000);
-#endif
       break;
     default:
       throw new NetException("Illegal target state requested %d", nextState);
@@ -266,10 +291,6 @@ void InterfaceServer::ControlSocketServer() {
     throw NetException("Failed to get control socket send timeout: %s", strerror(errno));
   debug("Control socket timeout %ld.%06ld s", timeout.tv_sec, timeout.tv_usec);
 
-#ifdef LEDE
-  set_led_timer(LED_SMARTSCOPE, 1000, 1000);
-  _changing_ap = false;
-#endif
   UnregisterService();
   _connected = true;
 
@@ -409,12 +430,9 @@ void InterfaceServer::ControlSocketServer() {
             break;
 
           case LEDE_CONNECT_AP:
+            debug("Changing LEDE AP by network command");
+            lede_connect_ap((char *)request->data);
             _changing_ap = true;
-            if(!lede_connect_ap((char *)request->data)) {
-              warn("Failed to connect to AP, reverting to own AP");
-              lede_mode_ap();
-            }
-            _changing_ap = false;
             info("Stopping server so it can restart");
             Stop();
             return;
@@ -462,13 +480,6 @@ void InterfaceServer::Disconnect() {
   pthread_t current_thread = pthread_self();
   if (!pthread_equal(current_thread, _thread_state))
     throw new NetException("State changing from wrong thread %p", &current_thread);
-
-#ifdef LEDE
-    if(_changing_ap) {
-      debug("Not performing disconnect while changing AP, to retain thread activity");
-      return;
-    }
-#endif
 
   if (_disconnect_called) {
       if (_connected)

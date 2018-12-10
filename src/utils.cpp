@@ -98,8 +98,7 @@ std::string execute_cmd(const char* cmd) {
   return result;
 }
 
-bool iface_has_addr() {
-  char interface[] = "wlan0";
+bool iface_has_addr(const char* interface) {
   debug("Checkinf if interface %s has an IP", interface);
   struct ifaddrs *ifaddr, *ifa;
   struct sockaddr_in *sa;
