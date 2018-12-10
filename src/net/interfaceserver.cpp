@@ -70,6 +70,7 @@ void InterfaceServer::ManageState() {
 #ifdef LEDE
   std::chrono::system_clock::time_point last_time_with_ip = std::chrono::system_clock::now();
   std::chrono::milliseconds time_since_ip_ok;
+  bool _waiting_for_ip = true;
 #endif
 
   while (_state != Destroyed)
@@ -82,17 +83,25 @@ void InterfaceServer::ManageState() {
     time_since_ip_ok = std::chrono::duration_cast<std::chrono::milliseconds>
       (std::chrono::system_clock::now() - last_time_with_ip);
 
-    if(_changing_ap || time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
+    if(_changing_ap || _waiting_for_ip || time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
       debug("Checking if we have an IP");
       if(lede_is_ap()) {
         _changing_ap = false;
+        _waiting_for_ip = true;
         last_time_with_ip = std::chrono::system_clock::now();
       } else {
         if(lede_has_wifi_ip()) {
           _changing_ap = false;
+          _waiting_for_ip = false;
           last_time_with_ip = std::chrono::system_clock::now();
           lede_set_led();
         } else {
+          if (_changing_ap) {
+            //Reset counter when we start changing AP
+            _changing_ap = false;
+            _waiting_for_ip = true;
+            last_time_with_ip = std::chrono::system_clock::now();
+          }
           debug("OMG still no IP");
           if(time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
             info("Too long without IP, moving back to AP mode");
