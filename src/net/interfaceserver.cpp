@@ -75,7 +75,7 @@ void InterfaceServer::ManageState() {
 
   while (_state != Destroyed)
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     if (_state == Destroying || _state == Starting || _state == Stopping)
       throw new NetException("Server state transitioning outside of state manager thread");
 
@@ -84,7 +84,6 @@ void InterfaceServer::ManageState() {
       (std::chrono::system_clock::now() - last_time_with_ip);
 
     if(_changing_ap || _waiting_for_ip || time_since_ip_ok.count() > LEDE_IP_TIMEOUT) {
-      debug("Checking if we have an IP");
       if(lede_is_ap()) {
         _changing_ap = false;
         _waiting_for_ip = true;
@@ -114,6 +113,14 @@ void InterfaceServer::ManageState() {
 
     //Local copy of stateRequested so code below is thread safe
     State nextState = _stateRequested;
+
+    try {
+      _scope->GetPicFirmwareVersion();
+    } catch (ScopeIOException) {
+      debug("Destroing, scope gone");
+      nextState = Destroyed;
+    }
+
     if (nextState == _state)
       continue;
 
