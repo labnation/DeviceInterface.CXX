@@ -113,14 +113,6 @@ void InterfaceServer::ManageState() {
 
     //Local copy of stateRequested so code below is thread safe
     State nextState = _stateRequested;
-
-    try {
-      _scope->GetPicFirmwareVersion();
-    } catch (ScopeIOException) {
-      debug("Destroing, scope gone");
-      nextState = Destroyed;
-    }
-
     if (nextState == _state)
       continue;
 
