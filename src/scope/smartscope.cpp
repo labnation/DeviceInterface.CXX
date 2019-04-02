@@ -1,5 +1,7 @@
 #include <labnation.h>
 #include <labnation/scope/smartscope.h>
+#include <labnation/scope/serial.h>
+#include <bitstream.h>
 
 #include <utils.h>
 #include <iostream>
@@ -50,24 +52,41 @@ SmartScope::~SmartScope() {
 }
 
 void SmartScope::FlashFpga() {
-  std::string fw_filename = Base36::Encode(serial->model, 3);
-  std::transform(fw_filename.begin(), fw_filename.end(), fw_filename.begin(), ::toupper);
-  fw_filename = "SmartScope_" + fw_filename + ".bin";
+  unsigned char* fw_data;
+  int fw_size;
 
-  std::ifstream file(fw_filename, std::ios::in|std::ios::binary|std::ios::ate);
-  if (file.is_open())
-  {
-    int fw_size = file.tellg();
-    char* fw_data = new char[fw_size];
-    file.seekg (0, std::ios::beg);
-    file.read(fw_data, fw_size);
-    file.close();
-    debug("Read fw file %s, %d bytes", fw_filename.c_str(), fw_size);
-    _hardware_interface->FlashFpga(fw_size, (uint8_t*)fw_data);
-    delete[] fw_data;
-  } else {
-    throw Exception("Unable to open file %s", fw_filename.c_str());
+  switch(serial->model) {
+    case MODEL_SMARTSCOPE_A10:
+      fw_data = smartscope_fpga_A10;
+      fw_size = sizeof(smartscope_fpga_A10);
+      break;
+    case MODEL_SMARTSCOPE_A12:
+      fw_data = smartscope_fpga_A12;
+      fw_size = sizeof(smartscope_fpga_A12);
+      break;
+    case MODEL_SMARTSCOPE_A14:
+      fw_data = smartscope_fpga_A14;
+      fw_size = sizeof(smartscope_fpga_A14);
+      break;
+    case MODEL_SMARTSCOPE_A15:
+      fw_data = smartscope_fpga_A15;
+      fw_size = sizeof(smartscope_fpga_A15);
+      break;
+    case MODEL_SMARTSCOPE_A16:
+      fw_data = smartscope_fpga_A16;
+      fw_size = sizeof(smartscope_fpga_A16);
+      break;
+    case MODEL_SMARTSCOPE_A17:
+      fw_data = smartscope_fpga_A17;
+      fw_size = sizeof(smartscope_fpga_A17);
+      break;
+    default:
+      fw_data = NULL;
+      fw_size = 0;
   }
+
+  debug("Using bitstream of %d bytes", fw_size);
+  _hardware_interface->FlashFpga(fw_size, (uint8_t*)fw_data);
 }
 
 void SmartScope::Configure() {
