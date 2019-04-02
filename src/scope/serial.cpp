@@ -22,7 +22,7 @@ Serial::Serial(std::string serial) {
   model = (Model)Base36::Decode(serial.substr(8, 3));
 }
 
-void Serial::Explain(Serial::Serial s) {
+void Serial::Explain(Serial s) {
   info("Serial %s: ", s.source.c_str());
   info("   Plant    %s [%d]", PlantMap[s.plant], s.plant);
   info("   Year     %4d", s.year);

@@ -40,7 +40,7 @@ class Serial {
 
 public:
   Serial(std::string serial);
-  static void Explain(Serial::Serial s);
+  static void Explain(Serial s);
 
   Plant plant;
   Model model;

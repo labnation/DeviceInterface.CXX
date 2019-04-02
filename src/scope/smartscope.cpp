@@ -35,7 +35,7 @@ SmartScope::SmartScope(SmartScopeUsb* interface)
   adc = new Adc(fpga_settings, fpga_strobes, fpga_rom);
   memories.push_back(adc);
 
-  serial = new Serial::Serial(_hardware_interface->GetSerial());
+  serial = new Serial(_hardware_interface->GetSerial());
   FlashFpga();
   if(FpgaFirmwareVersion() == FPGA_VERSION_UNFLASHED)
     throw Exception("Flashing FPGA failed");
@@ -396,7 +396,8 @@ void SmartScope::VerticalRange(AnalogChannel* channel, float minimum, float maxi
   SetDivider(channel, VALID_DIVIDERS[div_idx]);
   SetMultiplier(channel, VALID_MULTIPLIERS[mul_idx]);
   channelSettings[channel] = calibration->gain_calibration[channel][VALID_DIVIDERS[div_idx]][VALID_MULTIPLIERS[mul_idx]];
-  debug("Current channel setting for CH %s = [ %f, %f, %f ]", channel->name.c_str(), channelSettings[channel][0], channelSettings[channel][1], channelSettings[channel][2]);
+  debug("Current channel setting for CH %s = [ %f, %f, %f ]", channel->name.c_str(),
+    channelSettings[channel][0], channelSettings[channel][1], channelSettings[channel][2]);
 
   //Re-set yoffset
   YOffset(channel, YOffset(channel));
