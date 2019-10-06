@@ -29,7 +29,7 @@ DEPS := $(OBJS:.o=.d)
 CC = $(CROSS_COMPILE)c++
 LD = $(CROSS_COMPILE)ld
 
-CFLAGS += -Wall -g $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
+CFLAGS += -Wall $(INCLUDE_DIR_PARAM) -MMD -MP -std=c++11
 LIBS := -lusb-1.0 -lpthread -lstdc++
 
 ifdef DNSSD
@@ -43,7 +43,9 @@ LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
 ifdef DEBUG
 CFLAGS += -DDEBUG -g
 else
+ifndef LEDE
 CFLAGS += -O3
+endif
 endif
 
 ifdef BUILD_VERSION
