@@ -35,7 +35,7 @@ LIBS := -lusb-1.0 -lpthread -lstdc++
 ifdef DNSSD
 CFLAGS += -DDNSSD
 else
-LIBS += -lavahi-client -lavahi-common -ldbus-1
+LIBS += -lavahi-client -lavahi-common
 endif
 
 LDFLAGS += -Wall $(LIBS) $(LIB_DIR_PARAM)
