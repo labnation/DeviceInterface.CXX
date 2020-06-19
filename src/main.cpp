@@ -99,8 +99,10 @@ int main(int argc, char *argv[])
             debug("Server destroyed - quitting");
             delete(server);
             delete(scope);
+#ifdef LEDE
             set_led_timer(LED_GREEN, 0, 1000);
             set_led_timer(LED_BLUE, 1000, 0);
+#endif
           }
         }
       }
@@ -109,7 +111,9 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   libusb_exit(NULL);
+#ifdef LEDE
   set_led_timer(LED_GREEN, 0, 1000);
   set_led_timer(LED_BLUE, 0, 1000);
+#endif
   info("Server quiting");
 }
